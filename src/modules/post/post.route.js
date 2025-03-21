@@ -16,8 +16,9 @@ post_router.post(
   error_handle(post_controller.add_post)
 );
 post_router.get("/list", error_handle(post_controller.get_all_posts));
+post_router.get("/list_specific/:_id", error_handle(post_controller.get_specific_post));
 post_router.delete(
-  "/:post_id/delete",
+  "/delete/:post_id",
   isAuthenticated,
   error_handle(post_controller.delete_post)
 );

@@ -1,4 +1,4 @@
-import { category } from "../../../DB/models/index.js";
+import { category, sub_category } from "../../../DB/models/index.js";
 import { Error_handler_class } from "../../utils/index.js";
 /**
  * @api {POST} /categories/create  create a  new category
@@ -18,7 +18,7 @@ export const add_category = async (req, res, next) => {
     );
   }
   // create the category in db
-  const new_category = await category.create(name);
+  const new_category = await category.create({ name: name });
   // response
   res
     .status(201)
@@ -83,8 +83,8 @@ export const delete_category = async (req, res, next) => {
       new Error_handler_class("Category not found", 404, "Category not found")
     );
   }
-  // delete relevant articles
-  await sub_category.deleteMany({ category_id: Category._id });
+  // delete relevant sub_categories
+  await sub_category.deleteMany({ category: Category._id });
   // response
   res.status(200).json({ message: "Category deleted successfully" });
 };
