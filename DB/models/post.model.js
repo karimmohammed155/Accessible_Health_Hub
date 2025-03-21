@@ -49,6 +49,11 @@ const post_schema = new Schema(
       ref: "admin",
       required: false, // todo
     },
+    sub_category: {
+      type: Schema.Types.ObjectId,
+      ref: "sub_category",
+      required: false, // todo
+    },
   },
   { timestamps: true, versionKey: false }
 );

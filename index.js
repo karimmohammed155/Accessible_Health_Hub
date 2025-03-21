@@ -6,6 +6,7 @@ import {
   comment_router,
   interaction_router,
   post_router,
+  sub_category_router,
   user_router,
 } from "./src/modules/index.js";
 const app = express();
@@ -18,6 +19,7 @@ await connectDB();
 app.use(express.json());
 app.use("/user", user_router);
 app.use("/category", category_router);
+app.use("/sub_category", sub_category_router);
 app.use("/post", post_router);
 app.use("/interaction", interaction_router);
 app.use("/comment", comment_router);
