@@ -11,21 +11,22 @@ const post_schema = new Schema(
       type: String,
       required: true,
     },
-    image: {
-      secure_url: {
+    files: {
+      urls: [
+        {
+          secure_url: {
+            type: String,
+          },
+          public_id: {
+            type: String,
+            unique: true,
+          },
+        },
+      ],
+      custom_id: {
         type: String,
-        required: true,
-      },
-      public_id: {
-        type: String,
-        required: true,
         unique: true,
       },
-    },
-    custom_id: {
-      type: String,
-      required: true,
-      unique: true,
     },
     author: {
       type: Schema.Types.ObjectId,
