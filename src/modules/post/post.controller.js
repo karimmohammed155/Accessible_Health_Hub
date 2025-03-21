@@ -9,6 +9,7 @@ import {
 // create new post api
 export const add_post = async (req, res, next) => {
   const { title, content } = req.body;
+  // Validate required fields
   if (!title || !content) {
     return next(
       new Error_handler_class(
@@ -18,35 +19,43 @@ export const add_post = async (req, res, next) => {
       )
     );
   }
-  // image
-  if (!req.file) {
-    return next(
-      new Error_handler_class(
-        "please upload an image",
-        400,
-        "please upload an image"
-      )
-    );
-  }
-  // upload the image to cloudinary
+  // upload the files to cloudinary
+  const urls = [];
   const custom_id = nanoid(4);
-  const { secure_url, public_id } = await cloudinary.uploader.upload(
-    req.file.path,
-    {
-      folder: `${process.env.CLOUD_FOLDER_NAME}/posts/${custom_id}`,
+  if (req.files && req.files.length > 0) {
+    try {
+      for (const file of req.files) {
+        const { secure_url, public_id } = await cloudinary.uploader.upload(
+          file.path,
+          {
+            folder: `${process.env.CLOUD_FOLDER_NAME}/posts/${custom_id}`,
+          }
+        );
+        urls.push({ secure_url, public_id });
+      }
+    } catch (error) {
+      return next(
+        new Error_handler_class(
+          "Failed to upload files to Cloudinary.",
+          500,
+          "add_post API"
+        )
+      );
     }
-  );
+  }
+  // Create a new post object
   const new_post = new post({
     title,
     content,
-    image: {
-      secure_url: secure_url,
-      public_id: public_id,
+    files: {
+      urls: urls.length > 0 ? urls : undefined,
+      custom_id: custom_id,
     },
-    custom_id: custom_id,
     author: req.user._id,
   });
+  // Save the post to the database
   await new_post.save();
+  // response
   res
     .status(201)
     .json({ message: "post created successfully", data: new_post });
@@ -151,7 +160,7 @@ export const delete_post = async (req, res, next) => {
       .json({ message: "Unauthorized to delete this post" });
   }
   // delete the related image from cloudinary
-  const post_path = `${process.env.CLOUD_FOLDER_NAME}/posts/${find_post.custom_id}`;
+  const post_path = `${process.env.CLOUD_FOLDER_NAME}/posts/${find_post.files.custom_id}`;
   // delete the folder from cloudinary
   await cloudinary.api.delete_resources_by_prefix(post_path);
   await cloudinary.api.delete_folder(post_path);

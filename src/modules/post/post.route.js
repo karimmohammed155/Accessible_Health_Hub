@@ -12,11 +12,14 @@ const post_router = router();
 post_router.post(
   "/add",
   isAuthenticated,
-  multer_host(extensions.images).single("image"),
+  multer_host(extensions.images).array("files", 5),
   error_handle(post_controller.add_post)
 );
 post_router.get("/list", error_handle(post_controller.get_all_posts));
-post_router.get("/list_specific/:_id", error_handle(post_controller.get_specific_post));
+post_router.get(
+  "/list_specific/:_id",
+  error_handle(post_controller.get_specific_post)
+);
 post_router.delete(
   "/delete/:post_id",
   isAuthenticated,
