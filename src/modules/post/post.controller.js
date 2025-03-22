@@ -29,6 +29,7 @@ export const add_post = async (req, res, next) => {
           file.path,
           {
             folder: `${process.env.CLOUD_FOLDER_NAME}/posts/${custom_id}`,
+            use_filename: true,
           }
         );
         urls.push({ secure_url, public_id });

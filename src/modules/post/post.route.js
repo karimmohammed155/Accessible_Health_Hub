@@ -12,7 +12,13 @@ const post_router = router();
 post_router.post(
   "/add",
   isAuthenticated,
-  multer_host(extensions.images).array("files", 5),
+  multer_host({
+    allowed_extensions: [
+      ...extensions.images,
+      ...extensions.documents,
+      ...extensions.videos,
+    ],
+  }).array("files", 5),
   error_handle(post_controller.add_post)
 );
 post_router.get("/list", error_handle(post_controller.get_all_posts));
