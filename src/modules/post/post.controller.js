@@ -91,7 +91,7 @@ export const get_all_posts = async (req, res, next) => {
   // Get posts with their stats
   const postsWithStats = await Promise.all(
     find_post.map(async (post) => {
-      const likesCount = await interaction.countDocuments({
+      const likes_count = await interaction.countDocuments({
         post_id: post._id,
         type: "like",
       });
@@ -99,10 +99,15 @@ export const get_all_posts = async (req, res, next) => {
         post_id: post._id,
         type: "rating",
       });
+      const saves_count = await interaction.countDocuments({
+        post_id: post._id,
+        type: "save",
+      });
       return {
         ...post._doc,
-        likesCount,
-        ratingsCount: ratings.length,
+        likes_count,
+        ratings_count: ratings.length,
+        saves_count,
       };
     })
   );
@@ -132,7 +137,7 @@ export const get_specific_post = async (req, res, next) => {
     );
   }
   // Get post with it's stats
-  const likesCount = await interaction.countDocuments({
+  const likes_count = await interaction.countDocuments({
     post_id: specific_post._id,
     type: "like",
   });
@@ -140,8 +145,17 @@ export const get_specific_post = async (req, res, next) => {
     post_id: specific_post._id,
     type: "rating",
   });
+  const saves_count = await interaction.countDocuments({
+    post_id: specific_post._id,
+    type: "save",
+  });
   // response
-  res.json({ post: specific_post, likesCount, ratingsCount: ratings.length });
+  res.json({
+    post: specific_post,
+    likes_count,
+    ratings_count: ratings.length,
+    saves_count,
+  });
 };
 // DELETE /api/comment/delete/{post_id}
 export const delete_post = async (req, res, next) => {
