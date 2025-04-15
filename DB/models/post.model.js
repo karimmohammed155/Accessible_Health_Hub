@@ -12,21 +12,16 @@ const post_schema = new Schema(
       required: true,
     },
     files: {
-      urls: [
-        {
-          secure_url: {
-            type: String,
+      urls: {
+        type: [
+          {
+            secure_url: String,
+            public_id: String,
           },
-          public_id: {
-            type: String,
-            unique: true,
-          },
-        },
-      ],
-      custom_id: {
-        type: String,
-        unique: true,
+        ],
+        default: null,
       },
+      custom_id: String,
     },
     author: {
       type: Schema.Types.ObjectId,
