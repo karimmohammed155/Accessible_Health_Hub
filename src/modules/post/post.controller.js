@@ -157,7 +157,84 @@ export const get_specific_post = async (req, res, next) => {
     saves_count,
   });
 };
-// DELETE /api/comment/delete/{post_id}
+// Update post api
+export const update_post = async (req, res, next) => {
+  const { post_id } = req.params;
+  const { title, content } = req.body;
+
+  try {
+    // Find the existing post
+    const existingPost = await post.findById(post_id);
+    if (!existingPost) {
+      return next(new Error_handler_class("Post not found", 404, "update post api"));
+    }
+
+    // Verify authorization
+    if (existingPost.author.toString() !== req.user._id.toString()) {
+      return next(
+        new Error_handler_class(
+          "Unauthorized to update this post",
+          403,
+          "update post api"
+        )
+      );
+    }
+
+    // Update basic fields
+    if (title) existingPost.title = title;
+    if (content) existingPost.content = content;
+    existingPost.updated_at = Date.now();
+
+    // Handle file updates if new files are provided
+    if (req.files && req.files.length > 0) {
+      // Delete existing files if they exist
+      if (existingPost.files?.urls?.length > 0) {
+        const public_ids = existingPost.files.urls.map(file => file.public_id);
+        await cloudinary.api.delete_resources(public_ids);
+      }
+
+      // Upload new files
+      const newUrls = [];
+      const customId = existingPost.files?.custom_id || nanoid(4);
+      
+      for (const file of req.files) {
+        const { secure_url, public_id } = await cloudinary.uploader.upload(
+          file.path,
+          {
+            folder: `${process.env.CLOUD_FOLDER_NAME}/posts/${customId}`,
+            use_filename: true,
+          }
+        );
+        newUrls.push({ secure_url, public_id });
+      }
+
+      existingPost.files = {
+        urls: newUrls,
+        custom_id: customId
+      };
+    }
+
+    // Save the updated post
+    const updatedPost = await existingPost.save();
+
+    // response
+    res.status(200).json({
+      success: true,
+      message: "Post updated successfully",
+      data: updatedPost
+    });
+
+  } catch (error) {
+    return next(
+      new Error_handler_class(
+        error.message || "Failed to update post",
+        error.statusCode || 500,
+        "update post api"
+      )
+    );
+  }
+};
+// Delete post api
 export const delete_post = async (req, res, next) => {
   const { post_id } = req.params;
   // check if post exists
