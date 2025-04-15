@@ -15,7 +15,7 @@ dotenv.config();
 
 const port = process.env.PORT;
 
-connectDB();
+await connectDB();
 
 app.use(express.json());
 app.use("/user", user_router);
