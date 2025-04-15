@@ -26,6 +26,6 @@ app.use("/comment", comment_router);
 app.use(global_response);
 
 
-connectDB();
+await connectDB();
 app.get("/", (req, res) => res.send("Hello World!"));
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
