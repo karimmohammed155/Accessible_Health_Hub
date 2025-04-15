@@ -1,4 +1,4 @@
-import { Error_handler_class } from "../Utils/index.js"
+import { Error_handler_class } from "../utils/index.js"
 
 export const error_handle=(API)=>{
     return (req,res,next)=>{
