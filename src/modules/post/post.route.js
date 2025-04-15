@@ -26,6 +26,18 @@ post_router.get(
   "/list_specific/:_id",
   error_handle(post_controller.get_specific_post)
 );
+post_router.put(
+  "/update/:post_id",
+  isAuthenticated,
+  multer_host({
+    allowed_extensions: [
+      ...extensions.images,
+      ...extensions.documents,
+      ...extensions.videos,
+    ],
+  }).array("files", 5),
+  error_handle(post_controller.update_post)
+);
 post_router.delete(
   "/delete/:post_id",
   isAuthenticated,
