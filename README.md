@@ -86,175 +86,345 @@ All protected routes require a JWT token. Include the token in the request heade
 Authorization: Bearer <your_token>
 ```
 
-######################
-## Features
-- **User Authentication**: Register, login, password reset, and account management
-- **Post Management**: Create, read, update, and delete posts with file uploads
-- **Interactions**: Like, rate, and save posts with statistics tracking
-- **Comments**: Threaded comments with replies
-- **Content Organization**: Categories and sub-categories for content classification
-- **Cloud Storage**: Integrated Cloudinary support for media file management
+######
 
-## API Endpoints
+# Post Management API
 
-### Authentication Requirements
-🔒 = Requires authentication  
-🔓 = Public access
+## Overview
+This API provides endpoints for managing posts including creation, retrieval, updating, and deletion of posts. It supports file uploads (images, videos, documents), user authentication, and data referencing for categories, subcategories, comments, and interactions.
 
-### User Routes
-- `POST /user/register` - Register new user
-- `GET /user/activate_account/:token` - Activate account
-- `POST /user/login` - User login
-- `POST /user/forgetPassword` - Request password reset
-- `PUT /user/resetPassword` - Reset password
-- `PUT /user/updateUser` - Update user profile
-- `DELETE /user/deleteUser` - Delete user account
+## Base URL
+```
+http://localhost:3000/post
+```
 
-### Category Routes
-| Endpoint | Method | Auth | Description | Request Body |
-|----------|--------|------|-------------|--------------|
-| `/category/add` | POST | 🔒 | Create new category | `{ name }` |
-| `/category/get` | GET | 🔓 | Get categories (filter by ID or name) | Query: `_id?`, `name?` |
-| `/category/update/:_id` | PUT | 🔒 | Update category | `{ name }` |
-| `/category/delete/:_id` | DELETE | 🔒 | Delete category | - |
+## Endpoints
 
-### Sub-Category Routes
-| Endpoint | Method | Auth | Description | Request Body |
-|----------|--------|------|-------------|--------------|
-| `/sub_category/add` | POST | 🔒 | Create sub-category | `{ name, category_id }` |
-| `/sub_category/get` | GET | 🔓 | Get sub-categories | Query: `_id?`, `name?` |
-| `/sub_category/update/:_id` | PUT | 🔒 | Update sub-category | `{ name }` |
-| `/sub_category/delete/:_id` | DELETE | 🔒 | Delete sub-category | - |
+### Add Post
+```
+POST /add
+```
+Creates a new post. Authenticated users can upload up to 5 files (images, documents, or videos).
 
-### Post Routes
-| Endpoint | Method | Auth | Description | Request Body |
-|----------|--------|------|-------------|--------------|
-| `/post/add` | POST | 🔒 | Create new post | `{ title, content, files? }` |
-| `/post/list` | GET | 🔓 | Get all posts | - |
-| `/post/list_specific/:_id` | GET | 🔓 | Get specific post | - |
-| `/post/update/:post_id` | PUT | 🔒 | Update post | `{ title?, content?, files? }` |
-| `/post/delete/:post_id` | DELETE | 🔒 | Delete post | - |
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Body (multipart/form-data):**
+  - `title` (string, required)
+  - `content` (string, required)
+  - `files` (file[], optional) — up to 5 files
 
-### Comment Routes
-| Endpoint | Method | Auth | Description | Request Body |
-|----------|--------|------|-------------|--------------|
-| `/comment/:post_id/add` | POST | 🔒 | Add comment/reply | `{ text, parent_comment_id? }` |
-| `/comment/:post_id/get` | GET | 🔓 | Get all comments | - |
-| `/comment/:_id/delete` | DELETE | 🔒 | Delete comment | - |
+### Get All Posts
+```
+GET /list
+```
+Retrieves a list of all posts.
 
-### Interaction Routes
-| Endpoint | Method | Auth | Description | Request Body |
-|----------|--------|------|-------------|--------------|
-| `/interaction/:post_id/like` | POST | 🔒 | Like/unlike post | - |
-| `/interaction/:post_id/rate` | POST | 🔒 | Rate post | `{ rating }` |
-| `/interaction/:post_id/save` | POST | 🔒 | Save/unsave post | - |
-| `/interaction/:post_id/likes_count` | GET | 🔓 | Get likes count | - |
-| `/interaction/:post_id/ratings_count` | GET | 🔓 | Get ratings count | - |
-| `/interaction/saved_posts` | GET | 🔒 | Get saved posts | - |
+- **Headers:** None
 
-## Database Models with Attributes
+### Get Specific Post
+```
+GET /list_specific/:_id
+```
+Retrieves details for a specific post by its ID.
 
-### category model
-{
-  name: { type: String, required: true, unique: true },
-  createdAt: { type: Date },
-  updatedAt: { type: Date }
-}
+- **Headers:** None
+- **Params:**
+  - `_id` (string) — ID of the post
 
-### sub_category model
-{
-  name: { type: String, required: true, unique: true },
-  category: { 
-    type: Schema.Types.ObjectId, 
-    ref: "category", 
-    required: true 
-  },
-  createdAt: { type: Date },
-  updatedAt: { type: Date }
-}
+### Update Post
+```
+PUT /update/:post_id
+```
+Updates an existing post. Authenticated users can also upload new files.
 
-### post model
-{
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  files: {
-    urls: [{
-      secure_url: { type: String },
-      public_id: { type: String }
-    }],
-    custom_id: { type: String }
-  },
-  author: { 
-    type: Schema.Types.ObjectId, 
-    ref: "User", 
-    required: true 
-  },
-  interactions: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: "interaction" 
-  }],
-  comments: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: "comment" 
-  }],
-  sub_category: { 
-    type: Schema.Types.ObjectId, 
-    ref: "sub_category" 
-  },
-  createdAt: { type: Date },
-  updatedAt: { type: Date }
-}
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string) — ID of the post
+- **Body (multipart/form-data):**
+  - `title` (string, optional)
+  - `content` (string, optional)
+  - `files` (file[], optional) — up to 5 files
 
-### comment model
-{
-  text: { type: String, required: true },
-  author: { 
-    type: Schema.Types.ObjectId, 
-    ref: "User", 
-    required: true 
-  },
-  post_id: { 
-    type: Schema.Types.ObjectId, 
-    ref: "post", 
-    required: true 
-  },
-  parent_comment: { 
-    type: Schema.Types.ObjectId, 
-    ref: "comment" 
-  },
-  replies: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: "comment" 
-  }],
-  createdAt: { type: Date },
-  updatedAt: { type: Date }
-}
+### Delete Post
+```
+DELETE /delete/:post_id
+```
+Deletes a specific post. Authentication required.
 
-### interaction model
-{
-  user_id: { 
-    type: Schema.Types.ObjectId, 
-    ref: "User", 
-    required: true 
-  },
-  post_id: { 
-    type: Schema.Types.ObjectId, 
-    ref: "post", 
-    required: true 
-  },
-  type: { 
-    type: String, 
-    enum: ["like", "rating", "save"], 
-    required: true 
-  },
-  rating: { 
-    type: Number, 
-    min: 1, 
-    max: 5 
-  },
-  createdAt: { type: Date },
-  updatedAt: { type: Date }
-}
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string) — ID of the post
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+Authorization: Bearer <your_token>
+```
+######
+
+# Interaction Management API
+
+## Overview
+This API provides endpoints for managing interactions with posts including likes, ratings, and saving posts. All interaction routes require user authentication and are associated with specific post IDs.
+
+## Base URL
+```
+http://localhost:3000/interaction
+```
+
+## Endpoints
+
+### Like Post
+```
+POST /:post_id/like
+```
+Likes a specific post.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string) — ID of the post to like
+
+### Rate Post
+```
+POST /:post_id/rate
+```
+Rates a specific post between 1 and 5.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string)
+- **Body:**
+  - `rating` (number) — value from 1 to 5
+
+### Save Post
+```
+POST /:post_id/save
+```
+Saves a specific post to the user's saved posts list.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string)
+
+### Get Likes Count
+```
+GET /:post_id/likes_count
+```
+Retrieves the number of likes for a specific post.
+
+- **Headers:** None
+- **Params:**
+  - `post_id` (string)
+
+### Get Ratings Count
+```
+GET /:post_id/ratings_count
+```
+Retrieves the number of ratings for a specific post.
+
+- **Headers:** None
+- **Params:**
+  - `post_id` (string)
+
+### Get Saved Posts
+```
+GET /saved_posts
+```
+Retrieves a list of posts saved by the authenticated user.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+Authorization: Bearer <your_token>
+```
+######
+
+# Comment Management API
+
+## Overview
+This API provides endpoints for managing comments on posts, including adding, retrieving, and deleting comments. It supports nested replies and requires user authentication for modification actions.
+
+## Base URL
+```
+http://localhost:3000/comment
+```
+
+## Endpoints
+
+### Add Comment
+```
+POST /:post_id/add
+```
+Adds a new comment to a post.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string) — ID of the post to comment on
+- **Body:**
+  - `text` (string, required)
+  - `parent_comment` (string, optional) — ID of the parent comment (for replies)
+
+### Get Comments
+```
+GET /:post_id/get
+```
+Retrieves all comments for a specific post, including nested replies.
+
+- **Headers:** None
+- **Params:**
+  - `post_id` (string)
+
+### Delete Comment
+```
+DELETE /:_id/delete
+```
+Deletes a specific comment. Authentication required.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the comment to delete
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+Authorization: Bearer <your_token>
+```
+######
+
+# Category Management API
+
+## Overview
+This API provides endpoints for managing categories, including creation, retrieval, updating, and deletion. All write operations require user authentication.
+
+## Base URL
+```
+http://localhost:3000/category
+```
+
+## Endpoints
+
+### Add Category
+```
+POST /add
+```
+Adds a new category. Requires authentication.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Body:**
+  - `name` (string, required)
+
+### Get All Categories
+```
+GET /get
+```
+Retrieves all available categories.
+
+- **Headers:** None
+
+### Update Category
+```
+PUT /update/:_id
+```
+Updates the name of a specific category.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the category
+- **Body:**
+  - `name` (string, required)
+
+### Delete Category
+```
+DELETE /delete/:_id
+```
+Deletes a specific category.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the category
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+Authorization: Bearer <your_token>
+```
+######
+
+# Sub-Category Management API
+
+## Overview
+This API provides endpoints for managing sub-categories, including creation, retrieval, updating, and deletion. Each sub-category is associated with a parent category. All write operations require user authentication.
+
+## Base URL
+```
+http://localhost:3000/sub_category
+```
+
+## Endpoints
+
+### Add Sub-Category
+```
+POST /add
+```
+Adds a new sub-category. Requires authentication.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Body:**
+  - `name` (string, required)
+  - `category` (string, required) — ID of the parent category
+
+### Get All Sub-Categories
+```
+GET /get
+```
+Retrieves all available sub-categories.
+
+- **Headers:** None
+
+### Update Sub-Category
+```
+PUT /update/:_id
+```
+Updates the name or category of a specific sub-category.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the sub-category
+- **Body:**
+  - `name` (string, optional)
+  - `category` (string, optional)
+
+### Delete Sub-Category
+```
+DELETE /delete/:_id
+```
+Deletes a specific sub-category.
+
+- **Headers:**
+  - `Authorization`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the sub-category
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+Authorization: Bearer <your_token>
+```
 
 
 
