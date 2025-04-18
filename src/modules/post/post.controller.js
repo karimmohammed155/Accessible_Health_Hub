@@ -6,9 +6,9 @@ import {
   Error_handler_class,
 } from "../../utils/index.js";
 
-// create new post api
+// Create new post
 export const add_post = async (req, res, next) => {
-  const { title, content } = req.body;
+  const { title, content, sub_category } = req.body;
   // Validate required fields
   if (!title || !content) {
     return next(
@@ -19,7 +19,7 @@ export const add_post = async (req, res, next) => {
       )
     );
   }
-  // upload the files to cloudinary
+  // Upload files to Cloudinary
   const urls = [];
   const custom_id = nanoid(4);
   if (req.files && req.files.length > 0) {
@@ -53,13 +53,16 @@ export const add_post = async (req, res, next) => {
       custom_id: custom_id,
     },
     author: req.user._id,
+    sub_category: sub_category,
   });
-  // Save the post to the database
+
   await new_post.save();
-  // response
-  res
-    .status(201)
-    .json({ message: "post created successfully", data: new_post });
+
+  // Send response
+  res.status(201).json({
+    message: "Post created successfully",
+    data: new_post,
+  });
 };
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
@@ -166,7 +169,9 @@ export const update_post = async (req, res, next) => {
     // Find the existing post
     const existingPost = await post.findById(post_id);
     if (!existingPost) {
-      return next(new Error_handler_class("Post not found", 404, "update post api"));
+      return next(
+        new Error_handler_class("Post not found", 404, "update post api")
+      );
     }
 
     // Verify authorization
@@ -189,14 +194,16 @@ export const update_post = async (req, res, next) => {
     if (req.files && req.files.length > 0) {
       // Delete existing files if they exist
       if (existingPost.files?.urls?.length > 0) {
-        const public_ids = existingPost.files.urls.map(file => file.public_id);
+        const public_ids = existingPost.files.urls.map(
+          (file) => file.public_id
+        );
         await cloudinary.api.delete_resources(public_ids);
       }
 
       // Upload new files
       const newUrls = [];
       const customId = existingPost.files?.custom_id || nanoid(4);
-      
+
       for (const file of req.files) {
         const { secure_url, public_id } = await cloudinary.uploader.upload(
           file.path,
@@ -210,7 +217,7 @@ export const update_post = async (req, res, next) => {
 
       existingPost.files = {
         urls: newUrls,
-        custom_id: customId
+        custom_id: customId,
       };
     }
 
@@ -221,9 +228,8 @@ export const update_post = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Post updated successfully",
-      data: updatedPost
+      data: updatedPost,
     });
-
   } catch (error) {
     return next(
       new Error_handler_class(
