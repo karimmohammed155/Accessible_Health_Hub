@@ -5,7 +5,7 @@ This API provides user management features including registration, authenticatio
 
 ## Base URL
 ```
-http://localhost:3000/user
+https://knowledge-sharing-pied.vercel.app/user
 ```
 
 ## Endpoints
@@ -95,7 +95,7 @@ This API provides endpoints for managing posts including creation, retrieval, up
 
 ## Base URL
 ```
-http://localhost:3000/post
+https://knowledge-sharing-pied.vercel.app/post
 ```
 
 ## Endpoints
@@ -171,7 +171,7 @@ This API provides endpoints for managing interactions with posts including likes
 
 ## Base URL
 ```
-http://localhost:3000/interaction
+https://knowledge-sharing-pied.vercel.app/interaction
 ```
 
 ## Endpoints
@@ -254,7 +254,7 @@ This API provides endpoints for managing comments on posts, including adding, re
 
 ## Base URL
 ```
-http://localhost:3000/comment
+https://knowledge-sharing-pied.vercel.app/comment
 ```
 
 ## Endpoints
@@ -308,7 +308,7 @@ This API provides endpoints for managing categories, including creation, retriev
 
 ## Base URL
 ```
-http://localhost:3000/category
+https://knowledge-sharing-pied.vercel.app/category
 ```
 
 ## Endpoints
@@ -370,7 +370,7 @@ This API provides endpoints for managing sub-categories, including creation, ret
 
 ## Base URL
 ```
-http://localhost:3000/sub_category
+https://knowledge-sharing-pied.vercel.app/sub_category
 ```
 
 ## Endpoints
