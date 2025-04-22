@@ -6,6 +6,8 @@ import {
   multer_host,
 } from "../../middleware/index.js";
 import { extensions } from "../../utils/index.js";
+import { fileUpload } from "../../utils/index.js";
+const upload = fileUpload();
 
 const post_router = router();
 
@@ -31,5 +33,9 @@ post_router.delete(
   isAuthenticated,
   error_handle(post_controller.delete_post)
 );
+
+post_router.get('/search', post_controller.searchByText); // ?query=some text
+post_router.post('/search/audio', upload.single('audio'),post_controller.searchByAudio);
+
 
 export { post_router };

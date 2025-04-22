@@ -20,6 +20,7 @@ const post_schema = new Schema(
           public_id: {
             type: String,
             unique: true,
+            default: null
           },
         },
       ],
@@ -55,8 +56,10 @@ const post_schema = new Schema(
       ref: "sub_category",
       required: false, // todo
     },
+    isFlagged: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
+post_schema.index({ title: "text", content: "text" }); 
 
 export const post = mongoose.models.post || model("post", post_schema);

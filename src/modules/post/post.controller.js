@@ -6,9 +6,14 @@ import {
   Error_handler_class,
 } from "../../utils/index.js";
 
+import transcribeAudio  from '../../utils/transcribe.js'; 
+import fs from 'fs';
+import {Filter} from 'bad-words';
+
 // create new post api
 export const add_post = async (req, res, next) => {
   const { title, content } = req.body;
+
   // Validate required fields
   if (!title || !content) {
     return next(
@@ -19,9 +24,18 @@ export const add_post = async (req, res, next) => {
       )
     );
   }
+
+  // Initialize bad words filter
+  const filter = new Filter();
+
+
+  // Check if content or title contains inappropriate words
+  const containsBadWords = filter.isProfane(title) || filter.isProfane(content);
+
   // upload the files to cloudinary
   const urls = [];
   const custom_id = nanoid(4);
+
   if (req.files && req.files.length > 0) {
     try {
       for (const file of req.files) {
@@ -44,6 +58,7 @@ export const add_post = async (req, res, next) => {
       );
     }
   }
+
   // Create a new post object
   const new_post = new post({
     title,
@@ -53,13 +68,19 @@ export const add_post = async (req, res, next) => {
       custom_id: custom_id,
     },
     author: req.user._id,
+    isFlagged: containsBadWords,
+    flagReason: containsBadWords ? 'Contains inappropriate language' : undefined,
   });
+
   // Save the post to the database
   await new_post.save();
+
   // response
-  res
-    .status(201)
-    .json({ message: "post created successfully", data: new_post });
+  res.status(201).json({
+    message: "post created successfully",
+    autoFlagged: containsBadWords,
+    data: new_post,
+  });
 };
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
@@ -158,32 +179,94 @@ export const get_specific_post = async (req, res, next) => {
   });
 };
 // DELETE /api/comment/delete/{post_id}
+
 export const delete_post = async (req, res, next) => {
   const { post_id } = req.params;
-  // check if post exists
-  const find_post = await post.findById(post_id);
-  if (!find_post) {
-    res.status(404).json({ message: "Post not found" });
+
+  try {
+    // 1. Fetch post
+    const find_post = await post.findById(post_id);
+    
+    // 2. If post not found, return 404
+    if (!find_post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // 3. Authorization check (user or admin can delete)
+    const isAuthor = req.user && find_post.author.toString() === req.user._id.toString();
+    const isAdmin = !!req.admin;
+
+    if (!isAuthor && !isAdmin) {
+      return res.status(403).json({ message: "Unauthorized to delete this post" });
+    }
+
+    // 4. Delete post assets from Cloudinary
+    if (find_post.files?.custom_id) {
+      const post_path = `${process.env.CLOUD_FOLDER_NAME}/posts/${find_post.files.custom_id}`;
+      try {
+        await cloudinary.api.delete_resources_by_prefix(post_path);
+        await cloudinary.api.delete_folder(post_path);
+      } catch (err) {
+        console.error("Error deleting post assets from Cloudinary:", err.message);
+        // Continue deletion process even if cloud delete fails
+      }
+    }
+    // 5. Remove related comments and interactions
+    await comment.deleteMany({ post_id });
+    await interaction.deleteMany({ post_id });
+
+    // 6. Delete the post itself
+    await post.findByIdAndDelete(post_id);
+
+    // 7. Respond
+    return res.status(200).json({ message: "Post deleted successfully" });
+
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return res.status(500).json({ message: "An error occurred", error: error.message });
   }
-  // Only the author or admin can delete the post
-  if (
-    find_post.author.toString() !== req.user._id.toString() &&
-    req.user.role !== "admin"
-  ) {
-    return res
-      .status(403)
-      .json({ message: "Unauthorized to delete this post" });
+};
+
+export const searchByText = async (req, res) => {
+  try {
+    const { query } = req.query;
+    const results = await post.find({ $text: { $search: query } });
+    res.json({ success: true, query, results });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Text search failed', error: err.message });
   }
-  // delete the related image from cloudinary
-  const post_path = `${process.env.CLOUD_FOLDER_NAME}/posts/${find_post.files.custom_id}`;
-  // delete the folder from cloudinary
-  await cloudinary.api.delete_resources_by_prefix(post_path);
-  await cloudinary.api.delete_folder(post_path);
-  // Delete interactions and comments related to post
-  await comment.deleteMany({ post_id: post_id });
-  await interaction.deleteMany({ post_id: post_id });
-  // Delete post
-  await post.findByIdAndDelete(post_id);
-  // response
-  res.status(200).json({ message: "Post deleted successfully" });
+};
+
+export const searchByAudio = async (req, res) => {
+
+  try {
+    console.log(" File received:", req.file);
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No audio file uploaded' });
+    }
+
+    // Transcribe audio file to text
+    const transcript = await transcribeAudio(req.file.path);
+
+    if (!transcript) {
+      return res.status(500).json({ success: false, message: 'Failed to transcribe audio' });
+    }
+
+    // Perform text search with the transcript
+    const results = await post.find({ $text: { $search: transcript } });
+
+    // Delete the uploaded audio file after processing
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.error('Error deleting audio file:', err);
+      } else {
+        console.log('Audio file deleted successfully');
+      }
+    });
+
+    res.json({ success: true, transcript, results });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Audio search failed', error: err.message });
+  }
 };

@@ -5,6 +5,7 @@ export const register=joi.object({
     email:joi.string().email().required(),
     password:joi.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/).required(),
     confirmPassword:joi.string().valid(joi.ref("password")).required(),
+    role:joi.string().min(2).max(25),
 }).required();
 
 export const activate_account=joi.object({

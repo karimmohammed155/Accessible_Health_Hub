@@ -4,23 +4,22 @@ import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import randomstring from "randomstring";
-
 export const register = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   const user = await User.findOne({ email });
-
   if (user) return next(new Error("User already registered", { cause: 412 }));
 
   const hashedPassword = await bcrypt.hash(
     password,
     parseInt(process.env.SALT_ROUND)
   );
+
   const cloudFolder = nanoid();
 
   let profileImage;
 
-  // Check if there's an uploaded file
+  // Upload profile image or use default
   if (req.files && req.files.profileImage) {
     const file = req.files.profileImage[0];
     const { secure_url, public_id } = await cloudinary.uploader.upload(
@@ -36,30 +35,54 @@ export const register = asyncHandler(async (req, res, next) => {
       url: `https://res.cloudinary.com/${process.env.CLOUDNAME}/image/upload/v1741439525/download_uoxufk.jpg`,
     };
   }
+
+  // If role is doctor, national ID must be uploaded
+  let nationalID = null;
+  if (role === "doctor") {
+    if (!req.files || !req.files.nationalID) {
+      return next(new Error("National ID is required for doctor registration.", { cause: 400 }));
+    }
+
+    const idFile = req.files.nationalID[0];
+    const { secure_url, public_id } = await cloudinary.uploader.upload(
+      idFile.path,
+      {
+        folder: `${process.env.CLOUD_FOLDER_NAME}/user/${cloudFolder}/nationalID`,
+      }
+    );
+    nationalID = { id: public_id, url: secure_url };
+  }
+
   // Create the user
   await User.create({
     ...req.body,
     password: hashedPassword,
     cloudFolder,
     profileImage,
+    nationalID, // only set if role is doctor
+    isVerified: role === "doctor" ? false : true, // doctors require verification
   });
 
   const token = jwt.sign({ email }, process.env.SECRET_KEY);
 
-  const confirmationLink = `http://localhost:3000/user/activate_account/${token}`;
-  //send email
+  const confirmationLink = `https://knowledge-sharing-pied.vercel.app/user/activate_account/${token}`;
+
   const messageSent = await sendEmail({
     to: email,
     subject: "Activate account",
     html: `<a href=${confirmationLink}>Activate account</a>`,
   });
+
   if (!messageSent) return next(new Error("Something went wrong!"));
 
   return res.status(200).json({
     success: true,
-    message: "User created successfully",
+    message: role === "doctor"
+      ? "Doctor account created successfully. Awaiting admin verification."
+      : "User created successfully",
   });
 });
+
 
 export const activate_account = asyncHandler(async (req, res, next) => {
   const { token } = req.params;
