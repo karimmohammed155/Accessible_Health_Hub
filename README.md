@@ -107,7 +107,7 @@ POST /add
 Creates a new post. Authenticated users can upload up to 5 files (images, documents, or videos).
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Body (multipart/form-data):**
   - `title` (string, required)
   - `content` (string, required)
@@ -138,7 +138,7 @@ PUT /update/:post_id
 Updates an existing post. Authenticated users can also upload new files.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `post_id` (string) — ID of the post
 - **Body (multipart/form-data):**
@@ -153,14 +153,14 @@ DELETE /delete/:post_id
 Deletes a specific post. Authentication required.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `post_id` (string) — ID of the post
 
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-Authorization: Bearer <your_token>
+token: Bearer <your_token>
 ```
 ######
 
@@ -183,7 +183,7 @@ POST /:post_id/like
 Likes a specific post.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `post_id` (string) — ID of the post to like
 
@@ -194,7 +194,7 @@ POST /:post_id/rate
 Rates a specific post between 1 and 5.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `post_id` (string)
 - **Body:**
@@ -207,7 +207,7 @@ POST /:post_id/save
 Saves a specific post to the user's saved posts list.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `post_id` (string)
 
@@ -238,12 +238,12 @@ GET /saved_posts
 Retrieves a list of posts saved by the authenticated user.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-Authorization: Bearer <your_token>
+token: Bearer <your_token>
 ```
 ######
 
@@ -266,7 +266,7 @@ POST /:post_id/add
 Adds a new comment to a post.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `post_id` (string) — ID of the post to comment on
 - **Body:**
@@ -290,14 +290,14 @@ DELETE /:_id/delete
 Deletes a specific comment. Authentication required.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `_id` (string) — ID of the comment to delete
 
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-Authorization: Bearer <your_token>
+token: Bearer <your_token>
 ```
 ######
 
@@ -320,7 +320,7 @@ POST /add
 Adds a new category. Requires authentication.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Body:**
   - `name` (string, required)
 
@@ -339,7 +339,7 @@ PUT /update/:_id
 Updates the name of a specific category.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `_id` (string) — ID of the category
 - **Body:**
@@ -352,14 +352,14 @@ DELETE /delete/:_id
 Deletes a specific category.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `_id` (string) — ID of the category
 
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-Authorization: Bearer <your_token>
+token: Bearer <your_token>
 ```
 ######
 
@@ -382,7 +382,7 @@ POST /add
 Adds a new sub-category. Requires authentication.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Body:**
   - `name` (string, required)
   - `category` (string, required) — ID of the parent category
@@ -402,7 +402,7 @@ PUT /update/:_id
 Updates the name or category of a specific sub-category.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `_id` (string) — ID of the sub-category
 - **Body:**
@@ -416,14 +416,14 @@ DELETE /delete/:_id
 Deletes a specific sub-category.
 
 - **Headers:**
-  - `Authorization`: Bearer token for authentication
+  - `token`: Bearer token for authentication
 - **Params:**
   - `_id` (string) — ID of the sub-category
 
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-Authorization: Bearer <your_token>
+token: Bearer <your_token>
 ```
 
 
