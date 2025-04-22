@@ -23,7 +23,6 @@ const userSchema = new Schema(
       url: { type: String, required: true },
     },
     role: {
-      //Need to ask about it
       type: String,
       enum: ["doctor", "user"],
       default: "user",
@@ -33,12 +32,29 @@ const userSchema = new Schema(
       default: false,
     },
     admin: {
-      //Need to ask about it
       type: Types.ObjectId,
       ref: "Admin",
     },
     cloudFolder: { type: String, unique: true, required: true },
     forgetCode: { type: String, length: 5 },
+    isActive:{
+      type: Boolean,
+      default: true,
+    },
+    deactivatedUntil: {
+      type: Date,
+      default: null,
+    },
+    isVerified: {
+      type: Boolean,
+      default: function () {
+        return this.role === "doctor" ? false : true;
+      },
+    },
+    nationalID: {
+      id: { type: String },
+      url: { type: String },
+    },
   },
   { timestamps: true, versionKey: false }
 );
