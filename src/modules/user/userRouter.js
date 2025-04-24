@@ -7,7 +7,7 @@ const user_router = Router();
 
 user_router.post(
   "/register",
-  fileUpload().fields([{ name: "profileImage", maxCount: 1 }]),
+  fileUpload().fields([{ name: "profileImage", maxCount: 1 },{ name: "nationalID", maxCount: 1 } ]),
   validation(userSchema.register),
   userController.register
 );
