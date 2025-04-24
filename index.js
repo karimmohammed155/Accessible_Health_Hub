@@ -10,6 +10,7 @@ import {
   post_router,
   sub_category_router,
   user_router,
+  adminRouter
 } from "./src/modules/index.js";
 import { global_response } from "./src/middleware/index.js";
 import { socketHandler } from "./src/utils/socket.js";
@@ -29,6 +30,7 @@ app.use("/sub_category", sub_category_router);
 app.use("/post", post_router);
 app.use("/interaction", interaction_router);
 app.use("/comment", comment_router);
+app.use('/admin',adminRouter);
 app.use("/notification", notification_router);
 app.use(global_response);
 
