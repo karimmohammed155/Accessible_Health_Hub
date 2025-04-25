@@ -5,9 +5,9 @@ import {
   isAuthenticated,
   multer_host,
 } from "../../middleware/index.js";
-import { extensions } from "../../utils/index.js";
+import { extensions, fileAudioUpload } from "../../utils/index.js";
 import { fileUpload } from "../../utils/index.js";
-const upload = fileUpload();
+const upload = fileAudioUpload();
 
 const post_router = router();
 
