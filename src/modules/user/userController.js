@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import randomstring from "randomstring";
+
+
 export const register = asyncHandler(async (req, res, next) => {
   const { email, password, role } = req.body;
 
@@ -75,6 +77,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
   if (!messageSent) return next(new Error("Something went wrong!"));
 
+  console.log(messageSent);
   return res.status(200).json({
     success: true,
     message: role === "doctor"
