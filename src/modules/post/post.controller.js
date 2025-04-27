@@ -5,9 +5,9 @@ import {
   cloudinary,
   Error_handler_class,
 } from "../../utils/index.js";
-import transcribeAudio  from '../../utils/transcribe.js'; 
-import fs from 'fs';
-import {Filter} from 'bad-words';
+import transcribeAudio from "../../utils/transcribe.js";
+import fs from "fs";
+import { Filter } from "bad-words";
 
 // Create new post
 export const add_post = async (req, res, next) => {
@@ -26,7 +26,6 @@ export const add_post = async (req, res, next) => {
 
   // Initialize bad words filter
   const filter = new Filter();
-
 
   // Check if content or title contains inappropriate words
   const containsBadWords = filter.isProfane(title) || filter.isProfane(content);
@@ -68,7 +67,9 @@ export const add_post = async (req, res, next) => {
     },
     author: req.user._id,
     isFlagged: containsBadWords,
-    flagReason: containsBadWords ? 'Contains inappropriate language' : undefined,
+    flagReason: containsBadWords
+      ? "Contains inappropriate language"
+      : undefined,
   });
 
   // Save the post to the database
@@ -84,7 +85,7 @@ export const add_post = async (req, res, next) => {
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
-  const posts = post
+  const posts = await post
     .find()
     .populate("author", "name")
     .populate({
@@ -95,22 +96,16 @@ export const get_all_posts = async (req, res, next) => {
         populate: { path: "author", select: "name" },
       },
     })
-    .populate("interactions");
-  // Apply api features to the retrieved posts
-  const new_api_feature = new api_features(posts, req.query)
-    .sort()
-    .pagination()
-    .filters();
-  // Check if the posts exists
-  const find_post = await new_api_feature.mongoose_query;
-  if (!find_post) {
+    .populate("interactions")
+    .sort({ createdAt: -1 });
+  if (!posts) {
     return next(
       new Error_handler_class("posts not found", 404, "posts not found")
     );
   }
   // Get posts with their stats
   const postsWithStats = await Promise.all(
-    find_post.map(async (post) => {
+    posts.map(async (post) => {
       const likes_count = await interaction.countDocuments({
         post_id: post._id,
         type: "like",
@@ -264,18 +259,21 @@ export const delete_post = async (req, res, next) => {
   try {
     // 1. Fetch post
     const find_post = await post.findById(post_id);
-    
+
     // 2. If post not found, return 404
     if (!find_post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
     // 3. Authorization check (user or admin can delete)
-    const isAuthor = req.user && find_post.author.toString() === req.user._id.toString();
+    const isAuthor =
+      req.user && find_post.author.toString() === req.user._id.toString();
     const isAdmin = !!req.admin;
 
     if (!isAuthor && !isAdmin) {
-      return res.status(403).json({ message: "Unauthorized to delete this post" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this post" });
     }
 
     // 4. Delete post assets from Cloudinary
@@ -285,7 +283,10 @@ export const delete_post = async (req, res, next) => {
         await cloudinary.api.delete_resources_by_prefix(post_path);
         await cloudinary.api.delete_folder(post_path);
       } catch (err) {
-        console.error("Error deleting post assets from Cloudinary:", err.message);
+        console.error(
+          "Error deleting post assets from Cloudinary:",
+          err.message
+        );
         // Continue deletion process even if cloud delete fails
       }
     }
@@ -298,10 +299,11 @@ export const delete_post = async (req, res, next) => {
 
     // 7. Respond
     return res.status(200).json({ message: "Post deleted successfully" });
-
   } catch (error) {
     console.error("Error deleting post:", error);
-    return res.status(500).json({ message: "An error occurred", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
 
@@ -311,24 +313,33 @@ export const searchByText = async (req, res) => {
     const results = await post.find({ $text: { $search: query } });
     res.json({ success: true, query, results });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Text search failed', error: err.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Text search failed",
+        error: err.message,
+      });
   }
 };
 
 export const searchByAudio = async (req, res) => {
-
   try {
     console.log(" File received:", req.file);
 
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No audio file uploaded' });
+      return res
+        .status(400)
+        .json({ success: false, message: "No audio file uploaded" });
     }
 
     // Transcribe audio file to text
     const transcript = await transcribeAudio(req.file.path);
 
     if (!transcript) {
-      return res.status(500).json({ success: false, message: 'Failed to transcribe audio' });
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to transcribe audio" });
     }
 
     // Perform text search with the transcript
@@ -337,14 +348,20 @@ export const searchByAudio = async (req, res) => {
     // Delete the uploaded audio file after processing
     fs.unlink(req.file.path, (err) => {
       if (err) {
-        console.error('Error deleting audio file:', err);
+        console.error("Error deleting audio file:", err);
       } else {
-        console.log('Audio file deleted successfully');
+        console.log("Audio file deleted successfully");
       }
     });
 
     res.json({ success: true, transcript, results });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Audio search failed', error: err.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Audio search failed",
+        error: err.message,
+      });
   }
 };
