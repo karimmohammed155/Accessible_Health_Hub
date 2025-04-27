@@ -40,11 +40,6 @@ const post_schema = new Schema(
         ref: "comment",
       },
     ],
-    admin: {
-      type: Schema.Types.ObjectId,
-      ref: "admin",
-      required: false, // todo
-    },
     sub_category: {
       type: Schema.Types.ObjectId,
       ref: "sub_category",
