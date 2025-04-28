@@ -33,7 +33,6 @@ app.use("/interaction", interaction_router);
 app.use("/comment", comment_router);
 app.use('/admin',adminRouter);
 app.use('/product',productRouter);
-
 app.use("/notification", notification_router);
 app.use(global_response);
 
