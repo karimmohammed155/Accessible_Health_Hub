@@ -8,7 +8,8 @@ import {
   post_router,
   sub_category_router,
   user_router,
-  adminRouter
+  adminRouter,
+  productRouter
 } from "./src/modules/index.js";
 const app = express();
 dotenv.config();
@@ -25,6 +26,8 @@ app.use("/post", post_router);
 app.use("/interaction", interaction_router);
 app.use("/comment", comment_router);
 app.use('/admin',adminRouter);
+app.use('/product',productRouter);
+
 
 app.all("/*", (req, res, next) => {
   return next(new Error("Page not found", { cause: 404 }));
