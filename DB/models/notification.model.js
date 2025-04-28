@@ -8,7 +8,7 @@ const notification_schema = new Schema(
       ref: "User",
       required: true,
     },
-    sender: {
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -18,7 +18,7 @@ const notification_schema = new Schema(
       enum: ["like", "comment", "rate", "save", "mention"],
       required: true,
     },
-    post_id: {
+    postId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "post",
       required: true,
