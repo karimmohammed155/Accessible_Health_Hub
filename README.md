@@ -423,7 +423,7 @@ Deletes a specific sub-category.
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-token: Bearer <your_token>
+token: noteApp__<your_token>
 ```
 
 
