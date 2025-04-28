@@ -9,6 +9,19 @@ export const add_comment = async (req, res, next) => {
   if (!post_exists) {
     return res.status(404).json({ error: "Post not found" });
   }
+  // If it's a reply, check if the parent comment exists and belongs to the same post
+  let parent_comment = null;
+  if (parent_comment_id) {
+    parent_comment = await comment.findOne({
+      _id: parent_comment_id,
+      post_id: post_id,
+    });
+    if (!parent_comment) {
+      return res
+        .status(404)
+        .json({ error: "Parent comment not found in this post" });
+    }
+  }
   // Add new comment
   const new_comment = new comment({
     text: text,
