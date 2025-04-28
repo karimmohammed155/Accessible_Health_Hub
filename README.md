@@ -157,6 +157,30 @@ Deletes a specific post. Authentication required.
 - **Params:**
   - `post_id` (string) — ID of the post
 
+### Search Post by Text
+```
+GET /search
+```
+Search for posts by text.
+
+- **Headers:** None
+- **Params:**
+  - `query` (string) — The text to search for
+
+### Search Post by Audio
+```
+POST /search/audio
+```
+Search for posts by audio file upload.
+
+- **Headers:** 
+  - `token`: Bearer token for authentication
+- **Body (multipart/form-data):**
+  - `audio` (file) — The audio file to be uploaded for search
+
+
+
+
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
@@ -420,11 +444,103 @@ Deletes a specific sub-category.
 - **Params:**
   - `_id` (string) — ID of the sub-category
 
-## Authentication
+## **Admin API**
+
+### Base URL
+```
+https://knowledge-sharing-pied.vercel.app/admin
+```
+
+### Endpoints
+
+#### Login
+```
+POST /login
+```
+Authenticates an admin user and returns a JWT token.
+
+- **Headers:** None
+- **Body:**
+  - `email` (string)
+  - `password` (string)
+
+#### Forget Password
+```
+POST /forgetPassword
+```
+Initiates the password reset process and sends a reset code via email.
+
+- **Headers:** None
+- **Body:**
+  - `email` (string)
+
+#### Reset Password
+```
+PUT /resetPassword
+```
+Resets the admin's password.
+
+- **Headers:** None
+- **Body:**
+ - `email` (string)
+  - `password` (string)
+  -  `confirmPassword`(string)
+  - `forgetCode` (string)
+
+#### Remove Post
+```
+DELETE /remove-post/:post_id
+```
+Deletes a post.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+- **Params:**
+  - `post_id` (string)
+
+#### Flagged Posts
+```
+GET /flaggedPosts
+```
+Retrieves all flagged posts.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+#### Deactivate User
+```
+PUT /deactivate_user/:postId
+```
+Deactivates a user.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+- **Params:**
+  - `postId` (string)
+
+#### All National IDs
+```
+GET /AllNationalIds
+```
+Retrieves all national IDs.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+#### Verify Doctor
+```
+PUT /verifyDoctor/:userId
+```
+Verifies a doctor.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+- **Params:**
+  - `userId` (string)
+
+
+### Authentication for all apis
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
 token: noteApp__<your_token>
 ```
-
-
-
