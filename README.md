@@ -380,6 +380,7 @@ Deletes a specific category.
 - **Params:**
   - `_id` (string) — ID of the category
 
+
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
@@ -538,6 +539,50 @@ Verifies a doctor.
 - **Params:**
   - `userId` (string)
 
+### Add Product
+```
+POST /admin/
+```
+Creates a new product.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+- **Body:** multipart/form-data
+
+
+-productImage (file) – image of the product
+
+name (string, required) – min: 2, max: 20
+
+description (string, optional) – min: 10, max: 200
+
+price (integer, required) – min: 1
+
+link (string, required) – min: 2
+
+### Delete Product
+```
+DELETE /admin/:id
+```
+Deletes a product by ID.
+
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+Body:
+
+{
+  "id": "PRODUCT_OBJECT_ID"
+}
+### Get All Products
+```
+GET /products/
+```
+Retrieves all available products.
+
+Public endpoint: No authentication required
 
 ### Authentication for all apis
 All protected routes require a JWT token. Include the token in the request headers as follows:
