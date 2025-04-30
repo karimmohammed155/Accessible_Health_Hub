@@ -7,6 +7,58 @@ import jwt from "jsonwebtoken";
 import randomstring from "randomstring";
 import { Admin } from "../../../DB/models/adminModel.js";
 
+
+
+export const createAdmin = asyncHandler(async (req, res, next) => {
+  const { email,name } = req.body;
+
+  // Check if admin already exists
+  const existingAdmin = await Admin.findOne({ email });
+  if (existingAdmin) return next(new Error("Admin already exists", { cause: 409 }));
+
+  // Generate a random password
+  const generatedPassword = randomstring.generate(10);
+
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(generatedPassword, parseInt(process.env.SALT_ROUND));
+
+  // Create the admin
+  const newAdmin = await Admin.create({
+    name,
+    email,
+    password: hashedPassword,
+    is_email_verified: true, // optional depending on your logic
+  });
+
+  // Send the email
+  const sent = await sendEmail({
+    to: email,
+    subject: "Your Admin Account Credentials",
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #f9f9f9; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+  <h2 style="color: #2c3e50; text-align: center;">🎉 Welcome Aboard, Admin!</h2>
+  <p style="font-size: 16px; color: #333;">
+    Your admin account has been successfully created. Please use the following credentials to log in to your account:
+  </p>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 5px; margin-top: 20px;">
+    <p style="font-size: 16px;"><strong>Email:</strong> <span style="color: #2980b9;">${email}</span></p>
+    <p style="font-size: 16px;"><strong>Password:</strong> <span style="color: #c0392b;">${generatedPassword}</span></p>
+  </div>
+  <p style="font-size: 15px; margin-top: 30px; color: #666;">
+    🔒 For security reasons, we recommend changing your password after logging in.
+  </p>
+  <p style="font-size: 15px; color: #999; margin-top: 20px;">– The Admin Team</p>
+</div>`,
+  });
+
+  if (!sent) return next(new Error("Failed to send email"));
+
+  return res.status(201).json({
+    success: true,
+    message: "Admin created and credentials sent via email.",
+  });
+});
+
+
 export const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -61,7 +113,19 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
   const messageSent = await sendEmail({
     to: email,
     subject: "Forget password",
-    html: `<h1>${forgetCode}</h1>`,
+    html: `<div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 30px; background-color: #fefefe; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+  <h2 style="text-align: center; color: #2c3e50;">🔐 Password Reset Request</h2>
+  <p style="font-size: 16px; color: #555; text-align: center;">
+    Use the following verification code to reset your password. This code is valid for a limited time:
+  </p>
+  <div style="margin: 30px auto; background-color: #f0f4f8; padding: 20px 30px; text-align: center; border-radius: 8px; border: 1px dashed #ccc; width: fit-content;">
+    <span style="font-size: 32px; color: #007bff; font-weight: bold; letter-spacing: 4px;">${forgetCode}</span>
+  </div>
+  <p style="text-align: center; font-size: 14px; color: #999;">
+    If you didn’t request a password reset, you can safely ignore this email.
+  </p>
+  <p style="text-align: center; font-size: 14px; color: #ccc; margin-top: 30px;">— Support Team</p>
+</div>`,
   });
   if (!messageSent) return next(new Error("Something went wrong!"));
 
@@ -197,7 +261,10 @@ export const verifyDoctor = asyncHandler(async (req, res, next) => {
   const emailMessage = await sendEmail({
     to: user.email,
     subject: "Doctor Account Verified",
-    html: `<p>Your account has been successfully verified. You can now access all the doctor features.</p>`,
+    html: `<p style="font-family: Arial, sans-serif; font-size: 18px; color: #333; text-align: center; background-color: #eaf7e3; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 20px auto;">
+    <strong style="color: #4CAF50;">Your account has been successfully verified.</strong><br>
+    You can now access all the doctor features.
+  </p>`,
   });
 
   if (!emailMessage) {
