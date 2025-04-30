@@ -465,6 +465,17 @@ Authenticates an admin user and returns a JWT token.
   - `email` (string)
   - `password` (string)
 
+### Create Admin
+```
+POST /createAdmin
+Creates a new admin user and sends an email with the generated credentials.
+```
+- **Headers:**
+  - `token`: Bearer token for authentication
+- **Body:**
+  - `email` (string)
+  - `name` (string)
+
 #### Forget Password
 ```
 POST /forgetPassword
