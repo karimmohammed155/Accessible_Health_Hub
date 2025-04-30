@@ -16,16 +16,6 @@ const adminSchema=new Schema({
         type: String,
         required: true,
       },
-      profileImage: {
-        id: { type: String, required: true },
-        url: { type: String, required: true },
-      },
-      role: {
-        //Need to ask about it
-        type: String,
-        enum: ["doctor", "user"],
-        default: "user",
-      },
       is_email_verified: {
         type: Boolean,
         default: false,
