@@ -206,13 +206,14 @@ export const deactivate_user = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllNationalIds = asyncHandler(async (req, res, next) => {
-  const doctors = await User.find({ role: "doctor", nationalID: { $ne: null } });
+  const doctors = await User.find(
+    { role: "doctor", nationalID: { $ne: null } },
+    { _id: 1, nationalID: 1, name: 1, email: 1 });
 
-  const nationalIds = doctors.map(doctor => doctor.nationalID);
 
   return res.status(200).json({
     success: true,
-    data: nationalIds,
+    data: doctors,
   });
 });
 
