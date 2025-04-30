@@ -67,12 +67,41 @@ export const register = asyncHandler(async (req, res, next) => {
 
   const token = jwt.sign({ email }, process.env.SECRET_KEY);
 
-  const confirmationLink = `https://knowledge-sharing-pied.vercel.app/user/activate_account/${token}`;
+  const confirmationLink = `http://localhost:3000/user/activate_account/${token}`;
 
   const messageSent = await sendEmail({
     to: email,
     subject: "Activate account",
-    html: `<a href=${confirmationLink}>Activate account</a>`,
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #fdfdfd; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <h2 style="color: #2c3e50; text-align: center;">🎉 Welcome to Our Platform!</h2>
+
+  <p style="font-size: 16px; color: #555; text-align: center;">
+    Your  account has been created successfully. To activate your account and set your password, please click the button below.
+  </p>
+
+  <div style="text-align: center; margin: 40px 0;">
+    <a href="${confirmationLink}" 
+       style="background-color: #28a745; 
+              color: white; 
+              padding: 14px 24px; 
+              text-decoration: none; 
+              font-size: 16px; 
+              border-radius: 6px; 
+              display: inline-block; 
+              font-weight: bold;">
+      ✅ Activate Your Account
+    </a>
+  </div>
+
+  <p style="font-size: 14px; color: #777; text-align: center;">
+    If you did not request this account or believe this message was sent in error, please ignore this email.
+  </p>
+
+  <p style="font-size: 14px; color: #999; text-align: center; margin-top: 30px;">
+    — Accessible Hub Team
+  </p>
+</div>
+`,
   });
 
   if (!messageSent) return next(new Error("Something went wrong!"));
@@ -97,10 +126,59 @@ export const activate_account = asyncHandler(async (req, res, next) => {
 
   if (!user) return next(new Error("User not found!", { cause: 404 }));
 
-  return res.status(200).json({
-    success: true,
-    message: "Account activated successfully, try to login now:)",
-  });
+  return res.status(200).send(`
+  <html>
+    <head>
+      <title>Account Activated</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f8fb;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+        .card {
+          background: #fff;
+          padding: 40px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          text-align: center;
+          max-width: 500px;
+        }
+        h1 {
+          color: #28a745;
+        }
+        p {
+          font-size: 18px;
+          color: #555;
+        }
+        a {
+          display: inline-block;
+          margin-top: 20px;
+          padding: 12px 20px;
+          background-color: #007bff;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 6px;
+          font-weight: bold;
+        }
+        a:hover {
+          background-color: #0056b3;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>🎉 Account Activated</h1>
+        <p>Your account has been activated successfully. You can now log in.</p>
+      </div>
+    </body>
+  </html>
+`)
+  
 });
 
 export const login = asyncHandler(async (req, res, next) => {
@@ -157,7 +235,19 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
   const messageSent = await sendEmail({
     to: email,
     subject: "Forget password",
-    html: `<h1>${forgetCode}</h1>`,
+    html: `<div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 30px; background-color: #fefefe; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+  <h2 style="text-align: center; color: #2c3e50;">🔐 Password Reset Request</h2>
+  <p style="font-size: 16px; color: #555; text-align: center;">
+    Use the following verification code to reset your password. This code is valid for a limited time:
+  </p>
+  <div style="margin: 30px auto; background-color: #f0f4f8; padding: 20px 30px; text-align: center; border-radius: 8px; border: 1px dashed #ccc; width: fit-content;">
+    <span style="font-size: 32px; color: #007bff; font-weight: bold; letter-spacing: 4px;">${forgetCode}</span>
+  </div>
+  <p style="text-align: center; font-size: 14px; color: #999;">
+    If you didn’t request a password reset, you can safely ignore this email.
+  </p>
+  <p style="text-align: center; font-size: 14px; color: #ccc; margin-top: 30px;">— Support Team</p>
+</div>`,
   });
   if (!messageSent) return next(new Error("Something went wrong!"));
 

@@ -10,7 +10,11 @@ import * as productSchema from '../product/productSchema.js';
 const adminRouter=Router();
 
 
+
 adminRouter.post("/login", validation(userSchema.login), adminController.login); //To Do, need to choose a way as how the admin is verified
+
+adminRouter.post('/createAdmin',isAuthenticated,adminController.createAdmin);
+
 
 adminRouter.post(
   "/forgetPassword",
