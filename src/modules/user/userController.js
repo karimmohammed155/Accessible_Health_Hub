@@ -67,7 +67,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
   const token = jwt.sign({ email }, process.env.SECRET_KEY);
 
-  const confirmationLink = `http://localhost:3000/user/activate_account/${token}`;
+  const confirmationLink = `https://knowledge-sharing-pied.vercel.app/user/activate_account/${token}`;
 
   const messageSent = await sendEmail({
     to: email,
