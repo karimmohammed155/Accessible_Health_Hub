@@ -1,5 +1,5 @@
 import { asyncHandler, sendEmail, cloudinary } from "./../../utils/index.js";
-import { User, Token } from "./../../../DB/models/index.js";
+import { User, Token, post } from "./../../../DB/models/index.js";
 import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
@@ -336,4 +336,16 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
     success: true,
     message: "Your account has been deleted successfully",
   });
+});
+
+export const userProfile=asyncHandler(async(req,res,next)=>{
+  const user=req.user;
+
+  const posts=await post.find({author:user});
+
+  return res.status(200).json({
+    success:true,
+    userInformation:{user},
+    userPosts:{posts}
+  })
 });
