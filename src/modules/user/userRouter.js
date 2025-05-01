@@ -42,4 +42,5 @@ user_router.put(
   userController.updateUser
 );
 
+user_router.get('/userProfile',isAuthenticated,userController.userProfile);
 export { user_router };
