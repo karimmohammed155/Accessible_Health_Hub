@@ -1,95 +1,32 @@
-import { User, post, notification } from "../../../DB/models/index.js";
+import { notification } from "../../../DB/models/index.js";
 
-export const create_notification = async (req, res, next) => {
+export const createNotification = async ({
+  recipientId,
+  senderId,
+  postId,
+  type,
+  socket,
+}) => {
   try {
-    const { senderId, type, postId } = req.body;
-
-    const newNotification = new notification({
-      senderId,
-      userId: req.user._id,
+    // Create and save notification
+    const not = new notification({
+      recipient: recipientId,
+      sender: senderId,
+      post: postId,
       type,
-      postId,
     });
 
-    await newNotification.save();
+    await not.save();
 
-    res.status(201).json({
-      success: true,
-      message: "Notification created successfully",
-      data: newNotification,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const get_user_notifications = async (req, res, next) => {
-  try {
-    const userId = req.user._id;
-
-    const notifications = await notification
-      .find({ userId: userId})
-      .populate("senderId", "username profile_picture")
-      .populate("postId", "title")
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({
-      success: true,
-      message: "Unread notifications retrieved successfully",
-      data: notifications,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const get_notification_history = async (req, res, next) => {
-  try {
-    const userId = req.user._id;
-    const { page = 1, limit = 20 } = req.query;
-
-    const notifications = await notification
-      .find({ recipient: userId })
-      .populate("sender", "username profile_picture")
-      .populate("post_id", "title")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
-
-    res.status(200).json({
-      success: true,
-      message: "Notification history retrieved successfully",
-      data: notifications,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const mark_as_read = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user._id;
-
-    const updatedNotification = await notification
-      .findOneAndUpdate(
-        { _id: id, recipient: userId },
-        { is_read: true },
-        { new: true }
-      )
-      .populate("sender", "username profile_picture")
-      .populate("post_id", "title");
-
-    if (!updatedNotification) {
-      return next(new Error("Notification not found", { cause: 404 }));
+    // Emit notification to recipient's socket room
+    if (socket && recipientId) {
+      socket.to(recipientId.toString()).emit("new_notification", not);
+      console.log("📨 Real-time notification sent to", recipientId.toString());
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Notification marked as read",
-      data: updatedNotification,
-    });
+    return not;
   } catch (err) {
-    next(err);
+    console.error("❌ Failed to create or emit notification:", err);
+    throw err;
   }
 };

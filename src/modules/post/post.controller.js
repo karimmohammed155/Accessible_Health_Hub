@@ -1,19 +1,20 @@
 import { nanoid } from "nanoid";
-import { comment, interaction, post } from "../../../DB/models/index.js";
 import {
-  api_features,
-  cloudinary,
-  Error_handler_class,
-} from "../../utils/index.js";
+  comment,
+  interaction,
+  post,
+  sub_category,
+} from "../../../DB/models/index.js";
+import { cloudinary, Error_handler_class } from "../../utils/index.js";
 import transcribeAudio from "../../utils/transcribe.js";
 import fs from "fs";
 import { Filter } from "bad-words";
+import axios from "axios";
 
-// Create new post
+// Create new post api
 export const add_post = async (req, res, next) => {
   const { title, content } = req.body;
 
-  // Validate required fields
   if (!title || !content) {
     return next(
       new Error_handler_class(
@@ -23,18 +24,40 @@ export const add_post = async (req, res, next) => {
       )
     );
   }
+  const response = await axios.post("http://localhost:8000/predict", {
+    text: title + " " + content,
+  });
 
-  // Initialize bad words filter
+  const predictedSubCategory = response.data.sub_category;
+
+  const subCategory = await sub_category.findOne({
+    name: predictedSubCategory,
+  });
+
+  let finalSubCategory = subCategory;
+
+  if (!subCategory) {
+    finalSubCategory = await sub_category.findOne({ name: "Others" });
+
+    if (!finalSubCategory) {
+      return next(
+        new Error_handler_class(
+          'Subcategory not found in database, and "Others" fallback is missing',
+          400
+        )
+      );
+    }
+  }
+
+  // 2. Check for bad words
   const filter = new Filter();
-
-  // Check if content or title contains inappropriate words
   const containsBadWords = filter.isProfane(title) || filter.isProfane(content);
 
-  // Upload files to Cloudinary
+  // 3. Upload files to Cloudinary
   const urls = [];
   const custom_id = nanoid(4);
 
-  if (req.files && req.files.length > 0) {
+  if (req.files?.length > 0) {
     try {
       for (const file of req.files) {
         const { secure_url, public_id } = await cloudinary.uploader.upload(
@@ -57,13 +80,14 @@ export const add_post = async (req, res, next) => {
     }
   }
 
-  // Create a new post object
+  // 4. Save post
   const new_post = new post({
     title,
     content,
+    sub_category: finalSubCategory._id,
     files: {
       urls: urls.length > 0 ? urls : undefined,
-      custom_id: custom_id,
+      custom_id,
     },
     author: req.user._id,
     isFlagged: containsBadWords,
@@ -72,12 +96,10 @@ export const add_post = async (req, res, next) => {
       : undefined,
   });
 
-  // Save the post to the database
   await new_post.save();
 
-  // response
   res.status(201).json({
-    message: "post created successfully",
+    message: "Post created successfully",
     autoFlagged: containsBadWords,
     data: new_post,
   });
@@ -313,13 +335,11 @@ export const searchByText = async (req, res) => {
     const results = await post.find({ $text: { $search: query } });
     res.json({ success: true, query, results });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Text search failed",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Text search failed",
+      error: err.message,
+    });
   }
 };
 
@@ -356,12 +376,10 @@ export const searchByAudio = async (req, res) => {
 
     res.json({ success: true, transcript, results });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Audio search failed",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Audio search failed",
+      error: err.message,
+    });
   }
 };
