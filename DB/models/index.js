@@ -5,4 +5,4 @@ export * from "./interaction.model.js";
 export * from "./comment.model.js";
 export * from "./userModel.js";
 export * from "./tokenModel.js";
-export * from "./notification.model.js"
+export * from "./notification.model.js";

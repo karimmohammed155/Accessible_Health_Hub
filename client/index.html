@@ -1,0 +1,29 @@
+<!-- socket-test.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h2>Socket.IO Notification Test</h2>
+    <ul id="notifications"></ul>
+
+    <script>
+      const userId = "67d57c4a308a81d876056c9b"; // The _id of recipient
+      const socket = io("http://localhost:3000", {
+        query: { userId }
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected as:", userId);
+      });
+
+      socket.on("new_notification", (data) => {
+        const li = document.createElement("li");
+        li.innerText = `New ${data.type} on post ${data.post}`;
+        document.getElementById("notifications").appendChild(li);
+      });
+    </script>
+  </body>
+</html>

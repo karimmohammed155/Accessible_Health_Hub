@@ -43,12 +43,12 @@ const post_schema = new Schema(
     sub_category: {
       type: Schema.Types.ObjectId,
       ref: "sub_category",
-      required: false, // todo
+      required: true,
     },
     isFlagged: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
-post_schema.index({ title: "text", content: "text" }); 
+post_schema.index({ title: "text", content: "text" });
 
 export const post = mongoose.models.post || model("post", post_schema);

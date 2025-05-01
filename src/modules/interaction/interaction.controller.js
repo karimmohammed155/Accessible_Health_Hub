@@ -1,5 +1,6 @@
 import { interaction, post } from "../../../DB/models/index.js";
-import { Error_handler_class } from "../../utils/index.js";
+import { Error_handler_class, io } from "../../utils/index.js";
+import { createNotification } from "../notification/notification.controller.js";
 
 // POST /api/interaction/{post_id}/like
 export const like_post = async (req, res, next) => {
@@ -41,6 +42,14 @@ export const like_post = async (req, res, next) => {
     type: "like",
   });
   await new_like.save();
+  console.log("⚡ Preparing to send notification");
+  await createNotification({
+    recipientId: post_exists.author,
+    senderId: user_id,
+    postId: post_id,
+    type: "like",
+    socket: io,
+  });
   // add like to post
   await post.findByIdAndUpdate(post_id, {
     $push: { interactions: new_like._id },
