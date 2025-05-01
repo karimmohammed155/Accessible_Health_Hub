@@ -10,6 +10,16 @@ https://knowledge-sharing-pied.vercel.app/user
 
 ## Endpoints
 
+### User Profile
+
+```
+GET /userProfile
+```
+gets all users data and his posts
+- **Headers:**
+  - `token`: noteApp{token}
+
+
 ### Register User
 ```
 POST /register
