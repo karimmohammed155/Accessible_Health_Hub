@@ -6,3 +6,5 @@ export * from "./interaction/interaction.route.js";
 export * from "./comment/comment.route.js";
 export * from './admin/adminRouter.js';
 export * from './product/productRouter.js';
+export * from './notification/notification.route.js';
+

@@ -11,10 +11,10 @@ import {
   user_router,
   adminRouter,
   productRouter,
+  notification_router,
 } from "./src/modules/index.js";
 import { global_response } from "./src/middleware/index.js";
-import { init_socket } from "./src/utils/index.js";
-import { notification } from "./DB/models/notification.model.js";
+import { init_socket } from "./src/utils/socket.js";
 
 const app = express();
 dotenv.config();
@@ -33,6 +33,7 @@ app.use("/interaction", interaction_router);
 app.use("/comment", comment_router);
 app.use("/admin", adminRouter);
 app.use("/product", productRouter);
+app.use("/notification", notification_router);
 app.use(global_response);
 
 app.all("/*", (req, res, next) => {
@@ -51,4 +52,9 @@ app.use((error, req, res, next) => {
 const server = app.listen(port, () =>
   console.log(`App listening at http://localhost:${port}`)
 );
-init_socket(server);
+
+const io = init_socket(server);
+
+io.on("connection", (socket) => {
+  console.log("x user connected");
+});

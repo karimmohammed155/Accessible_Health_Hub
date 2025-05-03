@@ -3,22 +3,21 @@ const { model, Schema } = mongoose;
 
 const notification_schema = new Schema(
   {
-    recipient: {
+    sender: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    post: { type: mongoose.Schema.Types.ObjectId, ref: "post" },
-    type: {
-      type: String,
-      enum: ["like", "comment", "rate"],
+    receiver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-    is_read: { type: Boolean, default: false },
+    type: { type: String, enum: ["like", "comment", "save"], required: true },
+    postId: { type: mongoose.Schema.Types.ObjectId, ref: "post" },
+    isRead: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
 
-export const notification =
-  mongoose.models.notification || model("notification", notification_schema);
+export const notification = model("notification", notification_schema);
