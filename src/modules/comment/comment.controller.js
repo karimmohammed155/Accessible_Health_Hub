@@ -31,14 +31,6 @@ export const add_comment = async (req, res, next) => {
     parent_comment: parent_comment_id || null,
   });
   await new_comment.save();
-  // create notification of comment
-  await notification.create({
-    sender: req.user._id,
-    receiver: post_exists.author._id,
-    type: "comment",
-    postId: post_id,
-  });
-  get_socket().emit("notification", { message: "new comment added" });
   // check if it is a reply or new comment
   if (parent_comment_id) {
     // Add the reply to the parent comment's replies array
@@ -59,6 +51,14 @@ export const add_comment = async (req, res, next) => {
       { _id: post_id },
       { $push: { comments: new_comment._id } }
     );
+    // create notification of comment
+    await notification.create({
+      sender: req.user._id,
+      receiver: post_exists.author._id,
+      type: "comment",
+      postId: post_id,
+    });
+    get_socket().emit("notification", { message: "new comment added" });
   }
   // response
   res.status(201).json({ comment: new_comment });
