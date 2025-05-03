@@ -1,32 +1,23 @@
 import { notification } from "../../../DB/models/index.js";
 
-export const createNotification = async ({
-  recipientId,
-  senderId,
-  postId,
-  type,
-  socket,
-}) => {
+export const get_notifications=async(req,res)=>{
   try {
-    // Create and save notification
-    const not = new notification({
-      recipient: recipientId,
-      sender: senderId,
-      post: postId,
-      type,
-    });
+    const Notifications = await notification.find({ receiver: req.user._id })
+      .populate('sender', 'name')
+      .populate('postId', 'title')
+      .sort({ createdAt: -1 });
 
-    await not.save();
-
-    // Emit notification to recipient's socket room
-    if (socket && recipientId) {
-      socket.to(recipientId.toString()).emit("new_notification", not);
-      console.log("📨 Real-time notification sent to", recipientId.toString());
-    }
-
-    return not;
+    res.status(200).json(Notifications);
   } catch (err) {
-    console.error("❌ Failed to create or emit notification:", err);
-    throw err;
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+}
+
+export const markAsRead = async (req, res) => {
+  try {
+    await notification.findByIdAndUpdate(req.params._id, { isRead: true });
+    res.status(200).json({ message: 'Notification marked as read' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update notification' });
   }
 };
