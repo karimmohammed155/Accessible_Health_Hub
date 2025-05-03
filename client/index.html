@@ -1,29 +1,61 @@
-<!-- socket-test.html -->
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Socket.IO Test</title>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  </head>
-  <body>
-    <h2>Socket.IO Notification Test</h2>
-    <ul id="notifications"></ul>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Like Post Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>Test Like Post API</h2>
 
-    <script>
-      const userId = "67d57c4a308a81d876056c9b"; // The _id of recipient
-      const socket = io("http://localhost:3000", {
-        query: { userId }
-      });
+  <form id="likeForm">
+    <label for="postId">Post ID:</label><br>
+    <input type="text" id="postId" name="postId" required /><br><br>
 
-      socket.on("connect", () => {
-        console.log("Connected as:", userId);
-      });
+    <button type="submit">Like / Unlike Post</button>
+  </form>
 
-      socket.on("new_notification", (data) => {
-        const li = document.createElement("li");
-        li.innerText = `New ${data.type} on post ${data.post}`;
-        document.getElementById("notifications").appendChild(li);
-      });
-    </script>
-  </body>
+  <pre id="response"></pre>
+  <pre id="socketMessages"></pre>
+
+  <script>
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImtlbW9tb2hhbW1lZDE1NUBnbWFpbC5jb20iLCJpZCI6IjY3ZDU3YzRhMzA4YTgxZDg3NjA1NmM5YiIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ1ODY4NDMwLCJleHAiOjE3NDg0NjA0MzB9.QJQ_qxslVLOkv88WFoH7KS2ZTYjiKsohbswZKb7io_c'; // Replace with your full token
+
+    // Connect to Socket.IO
+    const socket = io('http://localhost:3000', {
+      auth: {
+        token: token // If your server requires it
+      }
+    });
+
+    // Listen for the 'notification' event
+    socket.on('notification', (data) => {
+      document.getElementById('socketMessages').textContent = '📩 Socket Message: ' + JSON.stringify(data, null, 2);
+    });
+
+    // Like Post API Request
+    document.getElementById('likeForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const postId = document.getElementById('postId').value.trim();
+      const url = `http://localhost:3000/interaction/${postId}/like`; // Adjust if needed
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            token: `noteApp__${token}`
+          }
+        });
+
+        const data = await response.json();
+        document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('response').textContent = `Error: ${err.message}`;
+      }
+    });
+  </script>
+</body>
 </html>
+
