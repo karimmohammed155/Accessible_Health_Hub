@@ -79,7 +79,6 @@ export const add_post = async (req, res, next) => {
       );
     }
   }
-
   // 4. Save post
   const new_post = new post({
     title,

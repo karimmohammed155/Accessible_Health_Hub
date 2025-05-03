@@ -277,7 +277,7 @@ Retrieves a list of posts saved by the authenticated user.
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-token: Bearer <your_token>
+token: noteApp__<your_token>
 ```
 ######
 
@@ -331,7 +331,7 @@ Deletes a specific comment. Authentication required.
 ## Authentication
 All protected routes require a JWT token. Include the token in the request headers as follows:
 ```
-token: Bearer <your_token>
+token: noteApp__<your_token>
 ```
 ######
 
@@ -347,17 +347,6 @@ https://knowledge-sharing-pied.vercel.app/category
 
 ## Endpoints
 
-### Add Category
-```
-POST /add
-```
-Adds a new category. Requires authentication.
-
-- **Headers:**
-  - `token`: Bearer token for authentication
-- **Body:**
-  - `name` (string, required)
-
 ### Get All Categories
 ```
 GET /get
@@ -365,38 +354,6 @@ GET /get
 Retrieves all available categories.
 
 - **Headers:** None
-
-### Update Category
-```
-PUT /update/:_id
-```
-Updates the name of a specific category.
-
-- **Headers:**
-  - `token`: Bearer token for authentication
-- **Params:**
-  - `_id` (string) — ID of the category
-- **Body:**
-  - `name` (string, required)
-
-### Delete Category
-```
-DELETE /delete/:_id
-```
-Deletes a specific category.
-
-- **Headers:**
-  - `token`: Bearer token for authentication
-- **Params:**
-  - `_id` (string) — ID of the category
-
-
-## Authentication
-All protected routes require a JWT token. Include the token in the request headers as follows:
-```
-token: Bearer <your_token>
-```
-######
 
 # Sub-Category Management API
 
@@ -410,18 +367,6 @@ https://knowledge-sharing-pied.vercel.app/sub_category
 
 ## Endpoints
 
-### Add Sub-Category
-```
-POST /add
-```
-Adds a new sub-category. Requires authentication.
-
-- **Headers:**
-  - `token`: Bearer token for authentication
-- **Body:**
-  - `name` (string, required)
-  - `category` (string, required) — ID of the parent category
-
 ### Get All Sub-Categories
 ```
 GET /get
@@ -429,31 +374,6 @@ GET /get
 Retrieves all available sub-categories.
 
 - **Headers:** None
-
-### Update Sub-Category
-```
-PUT /update/:_id
-```
-Updates the name or category of a specific sub-category.
-
-- **Headers:**
-  - `token`: Bearer token for authentication
-- **Params:**
-  - `_id` (string) — ID of the sub-category
-- **Body:**
-  - `name` (string, optional)
-  - `category` (string, optional)
-
-### Delete Sub-Category
-```
-DELETE /delete/:_id
-```
-Deletes a specific sub-category.
-
-- **Headers:**
-  - `token`: Bearer token for authentication
-- **Params:**
-  - `_id` (string) — ID of the sub-category
 
 ## **Admin API**
 

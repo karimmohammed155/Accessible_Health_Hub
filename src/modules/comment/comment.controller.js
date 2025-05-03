@@ -1,4 +1,5 @@
-import { comment, post } from "../../../DB/models/index.js";
+import { comment, notification, post } from "../../../DB/models/index.js";
+import { get_socket } from "../../utils/socket.js";
 
 // POST /api/comment/{post_id}
 export const add_comment = async (req, res, next) => {
@@ -30,12 +31,28 @@ export const add_comment = async (req, res, next) => {
     parent_comment: parent_comment_id || null,
   });
   await new_comment.save();
+  // create notification of comment
+  await notification.create({
+    sender: req.user._id,
+    receiver: post_exists.author._id,
+    type: "comment",
+    postId: post_id,
+  });
+  get_socket().emit("notification", { message: "new comment added" });
   // check if it is a reply or new comment
   if (parent_comment_id) {
     // Add the reply to the parent comment's replies array
     await comment.findByIdAndUpdate(parent_comment_id, {
       $push: { replies: new_comment._id },
     });
+    // create notification of reply
+    await notification.create({
+      sender: req.user._id,
+      receiver: post_exists.author._id,
+      type: "comment",
+      postId: post_id,
+    });
+    get_socket().emit("notification", { message: "new reply added" });
   } else {
     // If it's a top-level comment, add it to the post
     await post.findByIdAndUpdate(

@@ -32,6 +32,14 @@ export const like_post = async (req, res, next) => {
     await post.findByIdAndUpdate(post_id, {
       $pull: { interactions: like_exists._id },
     });
+    // Remove the related notification
+    await notification.findOneAndDelete({
+      sender: user_id,
+      receiver: post_exists.author._id,
+      postId: post_id,
+      type: "like",
+    });
+    get_socket().emit("notification", { message: "like removed" });
     return res.json({ message: "Like Removed" });
   }
   // add new like
@@ -53,7 +61,7 @@ export const like_post = async (req, res, next) => {
     type: "like",
     postId: post_id,
   });
-  get_socket().emit("notification", { message: "new notification added" });
+  get_socket().emit("notification", { message: "new like added" });
   // response
   res.status(201).json({ message: "Post Liked", Data: new_like });
 };
@@ -111,6 +119,14 @@ export const rate_post = async (req, res, next) => {
   await post.findByIdAndUpdate(post_id, {
     $push: { interactions: new_rate._id },
   });
+  // create notification of rating
+  await notification.create({
+    sender: user_id,
+    receiver: post_exists.author._id,
+    type: "rate",
+    postId: post_id,
+  });
+  get_socket().emit("notification", { message: "new rate added" });
   // response
   res.status(201).json({ message: "Post Rated", Data: new_rate });
 };

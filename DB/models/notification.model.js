@@ -13,7 +13,11 @@ const notification_schema = new Schema(
       ref: "User",
       required: true,
     },
-    type: { type: String, enum: ["like", "comment", "save"], required: true },
+    type: {
+      type: String,
+      enum: ["like", "rate", "comment"],
+      required: true,
+    },
     postId: { type: mongoose.Schema.Types.ObjectId, ref: "post" },
     isRead: { type: Boolean, default: false },
   },
