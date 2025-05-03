@@ -24,30 +24,30 @@ export const add_post = async (req, res, next) => {
       )
     );
   }
-  const response = await axios.post("http://localhost:8000/predict", {
-    text: title + " " + content,
-  });
+  // const response = await axios.post("http://localhost:8000/predict", {
+  //   text: title + " " + content,
+  // });
 
-  const predictedSubCategory = response.data.sub_category;
+  // const predictedSubCategory = response.data.sub_category;
 
-  const subCategory = await sub_category.findOne({
-    name: predictedSubCategory,
-  });
+  // const subCategory = await sub_category.findOne({
+  //   name: predictedSubCategory,
+  // });
 
-  let finalSubCategory = subCategory;
+  // let finalSubCategory = subCategory;
 
-  if (!subCategory) {
-    finalSubCategory = await sub_category.findOne({ name: "Others" });
+  // if (!subCategory) {
+  //   finalSubCategory = await sub_category.findOne({ name: "Others" });
 
-    if (!finalSubCategory) {
-      return next(
-        new Error_handler_class(
-          'Subcategory not found in database, and "Others" fallback is missing',
-          400
-        )
-      );
-    }
-  }
+  //   if (!finalSubCategory) {
+  //     return next(
+  //       new Error_handler_class(
+  //         'Subcategory not found in database, and "Others" fallback is missing',
+  //         400
+  //       )
+  //     );
+  //   }
+  // }
 
   // 2. Check for bad words
   const filter = new Filter();
@@ -84,7 +84,7 @@ export const add_post = async (req, res, next) => {
   const new_post = new post({
     title,
     content,
-    sub_category: finalSubCategory._id,
+    // sub_category: finalSubCategory._id,
     files: {
       urls: urls.length > 0 ? urls : undefined,
       custom_id,
