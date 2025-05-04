@@ -34,7 +34,7 @@ export const register = asyncHandler(async (req, res, next) => {
   } else {
     profileImage = {
       id: "default_public_id",
-      url: `https://res.cloudinary.com/${process.env.CLOUDNAME}/image/upload/v1741439525/download_uoxufk.jpg`,
+      url: `https://res.cloudinary.com/drgcr9g01/image/upload/v1741439525/download_uoxufk.jpg`,
     };
   }
 
