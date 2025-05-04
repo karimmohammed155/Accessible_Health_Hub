@@ -43,7 +43,6 @@ const post_schema = new Schema(
     sub_category: {
       type: Schema.Types.ObjectId,
       ref: "sub_category",
-      // required: true,
     },
     isFlagged: { type: Boolean, default: false },
   },
