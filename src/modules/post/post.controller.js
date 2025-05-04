@@ -103,6 +103,8 @@ export const add_post = async (req, res, next) => {
     data: new_post,
   });
 };
+
+
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
