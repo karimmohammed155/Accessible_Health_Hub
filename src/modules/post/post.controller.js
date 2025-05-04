@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import {
+  category,
   comment,
   interaction,
   post,
@@ -24,33 +25,92 @@ export const add_post = async (req, res, next) => {
       )
     );
   }
-  // const response = await axios.post("http://localhost:8000/predict", {
-  //   text: title + " " + content,
-  // });
 
-  // const predictedSubCategory = response.data.sub_category;
+// 1. Predict subcategory using AI
+let finalSubCategory = null;
+let finalCategory = null;
 
-  // const subCategory = await sub_category.findOne({
-  //   name: predictedSubCategory,
-  // });
+try {
+  const response = await axios.post(
+    "https://api-inference.huggingface.co/models/yazied49/knowledge_disability_model",
+    {
+      inputs: `${title} ${content}`,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.AiToken}`,
+      },
+    }
+  );
 
-  // let finalSubCategory = subCategory;
+  const predictions = response.data?.[0]; // since it's a 2D array
+  if (!predictions || predictions.length === 0) {
+    return next(
+      new Error_handler_class(
+        "AI did not return any predictions.",
+        500,
+        "add post api"
+      )
+    );
+  }
 
-  // if (!subCategory) {
-  //   finalSubCategory = await sub_category.findOne({ name: "Others" });
+  const topPrediction = predictions[0];
+  const predictedCategory = topPrediction.label?.category;
+  const predictedSubCategory = topPrediction.label?.sub_category;
 
-  //   if (!finalSubCategory) {
-  //     return next(
-  //       new Error_handler_class(
-  //         'Subcategory not found in database, and "Others" fallback is missing',
-  //         400
-  //       )
-  //     );
-  //   }
-  // }
+  if (!predictedCategory || !predictedSubCategory) {
+    return next(
+      new Error_handler_class(
+        "AI model returned invalid prediction structure.",
+        500,
+        "add post api"
+      )
+    );
+  }
 
-  // 2. Check for bad words
-  const filter = new Filter();
+  // First, find the category
+  finalCategory = await category.findOne({
+    name: { $regex: `^${predictedCategory}$`, $options: "i" },
+  });
+
+  if (!finalCategory) {
+    return next(
+      new Error_handler_class(
+        `Predicted category "${predictedCategory}" not found in database.`,
+        400,
+        "add post api"
+      )
+    );
+  }
+
+  // Then, find the subcategory within that category
+  finalSubCategory = await sub_category.findOne({
+    name: { $regex: `^${predictedSubCategory}$`, $options: "i" },
+    category: finalCategory._id,
+  });
+
+  if (!finalSubCategory) {
+    return next(
+      new Error_handler_class(
+        `Subcategory "${predictedSubCategory}" not found in category "${predictedCategory}".`,
+        400,
+        "add post api"
+      )
+    );
+  }
+
+} catch (error) {
+  console.error("AI prediction error:", error.response?.data || error.message);
+  return next(
+    new Error_handler_class(
+      "Failed to predict category/subcategory from AI service.",
+      500,
+      "add post api"
+    )
+  );
+}
+const filter = new Filter();
   const containsBadWords = filter.isProfane(title) || filter.isProfane(content);
 
   // 3. Upload files to Cloudinary
@@ -83,8 +143,8 @@ export const add_post = async (req, res, next) => {
   const new_post = new post({
     title,
     content,
-    // sub_category: finalSubCategory._id,
-    files: {
+    sub_category: finalSubCategory?._id,
+  files: {
       urls: urls.length > 0 ? urls : undefined,
       custom_id,
     },
@@ -100,8 +160,11 @@ export const add_post = async (req, res, next) => {
   res.status(201).json({
     message: "Post created successfully",
     autoFlagged: containsBadWords,
+    category:finalCategory?.name,
+    predictedSubCategory: finalSubCategory?.name,
     data: new_post,
   });
+
 };
 
 
