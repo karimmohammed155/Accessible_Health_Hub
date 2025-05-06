@@ -530,3 +530,42 @@ All protected routes require a JWT token. Include the token in the request heade
 ```
 token: noteApp__<your_token>
 ```
+######
+
+# Notification Management API
+
+## Overview
+This API provides endpoints for retrieving and updating notifications related to user activities such as likes, comments, and post interactions. All routes require user authentication.
+
+## Base URL
+```
+https://knowledge-sharing-pied.vercel.app/notification
+```
+
+## Endpoints
+
+### Get Notifications
+```
+GET /
+```
+Retrieves all notifications for the authenticated user. Notifications include information about the sender and the associated post.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+### Mark Notification as Read
+```
+PATCH /:_id/read
+```
+Marks a specific notification as read by its ID.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the notification
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+token: noteApp__<your_token>
+```
