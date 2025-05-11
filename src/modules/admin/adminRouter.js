@@ -41,4 +41,5 @@ adminRouter.post('/',isAuthenticated,fileUpload().fields([
 //delete product
 adminRouter.delete('/:id',isAuthenticated,validation(productSchema.deleteProduct),productController.deleteProduct);
 
+adminRouter.put('/:id',isAuthenticated,validation(productSchema.updateProduct),productController.updateProduct);
 export  {adminRouter};
