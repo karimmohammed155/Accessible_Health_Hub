@@ -70,3 +70,22 @@ export const allProducts=asyncHandler(async(req,res,next)=>{
     products,
   });
 });
+
+
+export const updateProduct=asyncHandler(async(req,res,next)=>{
+ const {name,price,description,link}=req.body;
+    // Check if the product exists
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+        next(new Error("Product not found", { cause: 404 }));
+        return;
+    }
+
+    const updatedProduct=await Product.findByIdAndUpdate(req.params.id,{name,price,description,link})
+
+    return res.json({
+        success: true,
+        message: "Product updated successfully!",
+        product: updatedProduct
+    });
+})
