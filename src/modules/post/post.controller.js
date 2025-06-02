@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
 import {
-  category,
   comment,
   interaction,
   post,
@@ -10,9 +9,9 @@ import { cloudinary, Error_handler_class } from "../../utils/index.js";
 import transcribeAudio from "../../utils/transcribe.js";
 import fs from "fs";
 import { Filter } from "bad-words";
-import axios from "axios";
+import { Client } from "@gradio/client";
 
-// Create new post api
+// Add new post api
 export const add_post = async (req, res, next) => {
   const { title, content } = req.body;
 
@@ -26,94 +25,54 @@ export const add_post = async (req, res, next) => {
     );
   }
 
-// 1. Predict subcategory using AI
-let finalSubCategory = null;
-let finalCategory = null;
+  let finalSubCategory = null;
 
-try {
-  const response = await axios.post(
-    "https://api-inference.huggingface.co/models/yazied49/knowledge_disability_model",
-    {
-      inputs: `${title} ${content}`,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.AiToken}`,
-      },
-    }
-  );
-
-  const predictions = response.data?.[0]; // since it's a 2D array
-  if (!predictions || predictions.length === 0) {
-    return next(
-      new Error_handler_class(
-        "AI did not return any predictions.",
-        500,
-        "add post api"
-      )
-    );
-  }
-
-  const topPrediction = predictions[0];
-  const predictedCategory = topPrediction.label?.category;
-  const predictedSubCategory = topPrediction.label?.sub_category;
-
-  if (!predictedCategory || !predictedSubCategory) {
-    return next(
-      new Error_handler_class(
-        "AI model returned invalid prediction structure.",
-        500,
-        "add post api"
-      )
-    );
-  }
-
-  // First, find the category
-  finalCategory = await category.findOne({
-    name: { $regex: `^${predictedCategory}$`, $options: "i" },
+  // Connect to Gradio client and predict
+  const client = await Client.connect("yazied49/disability-api");
+  const result = await client.predict("/predict", {
+    text: `${title} ${content}`,
   });
 
-  if (!finalCategory) {
+  const predictionOutput = result?.data?.[0];
+  if (!predictionOutput) {
     return next(
       new Error_handler_class(
-        `Predicted category "${predictedCategory}" not found in database.`,
-        400,
+        "AI model returned no prediction",
+        500,
         "add post api"
       )
     );
   }
 
-  // Then, find the subcategory within that category
+  const [categoryLine] = predictionOutput.split("\n");
+  const predictedSubCategory = categoryLine?.split(":")[1]?.trim();
+
+  if (!predictedSubCategory) {
+    return next(
+      new Error_handler_class("Invalid prediction format", 500, "add post api")
+    );
+  }
+
+  // Find subcategory only
   finalSubCategory = await sub_category.findOne({
     name: { $regex: `^${predictedSubCategory}$`, $options: "i" },
-    category: finalCategory._id,
   });
 
   if (!finalSubCategory) {
     return next(
       new Error_handler_class(
-        `Subcategory "${predictedSubCategory}" not found in category "${predictedCategory}".`,
+        `Subcategory "${predictedSubCategory}" not found in database.`,
         400,
         "add post api"
       )
     );
   }
 
-} catch (error) {
-  console.error("AI prediction error:", error.response?.data || error.message);
-  return next(
-    new Error_handler_class(
-      "Failed to predict category/subcategory from AI service.",
-      500,
-      "add post api"
-    )
-  );
-}
-const filter = new Filter();
+  // Profanity check
+  const filter = new Filter();
   const containsBadWords = filter.isProfane(title) || filter.isProfane(content);
 
-  // 3. Upload files to Cloudinary
+  // Upload files to Cloudinary
   const urls = [];
   const custom_id = nanoid(4);
 
@@ -139,12 +98,13 @@ const filter = new Filter();
       );
     }
   }
-  // 4. Save post
+
+  // Save post
   const new_post = new post({
     title,
     content,
     sub_category: finalSubCategory?._id,
-  files: {
+    files: {
       urls: urls.length > 0 ? urls : undefined,
       custom_id,
     },
@@ -160,14 +120,10 @@ const filter = new Filter();
   res.status(201).json({
     message: "Post created successfully",
     autoFlagged: containsBadWords,
-    category:finalCategory?.name,
     predictedSubCategory: finalSubCategory?.name,
     data: new_post,
   });
-
 };
-
-
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
@@ -183,6 +139,7 @@ export const get_all_posts = async (req, res, next) => {
       },
     })
     .populate("interactions")
+    .populate("sub_category")
     .sort({ createdAt: -1 });
   if (!posts) {
     return next(
@@ -230,7 +187,8 @@ export const get_specific_post = async (req, res, next) => {
         populate: { path: "author", select: "name" },
       },
     })
-    .populate("interactions");
+    .populate("interactions")
+    .populate("sub_category");
   // Check if the posts exists
   if (!specific_post) {
     return next(
