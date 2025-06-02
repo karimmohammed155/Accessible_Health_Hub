@@ -494,9 +494,9 @@ Creates a new product.
 
 -productImage (file) – image of the product
 
-name (string, required) – min: 2, max: 20
+name (string, required) – min: 2, max: 200
 
-description (string, optional) – min: 10, max: 200
+description (string, optional) – min: 10, max: 500
 
 price (integer, required) – min: 1
 
@@ -517,6 +517,29 @@ Body:
 {
   "id": "PRODUCT_OBJECT_ID"
 }
+
+### update Product
+```
+PUT /admin/
+```
+Creates a new product.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+- **Body:** raw json data
+
+
+
+name (string, required) – min: 2, max: 200
+
+description (string, optional) – min: 10, max: 500
+
+price (integer, required) – min: 1
+
+link (string, required) – min: 2
+
+all body variables are optional 
 ### Get All Products
 ```
 GET /products/

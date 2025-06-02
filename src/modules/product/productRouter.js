@@ -17,4 +17,6 @@ productRouter.delete('/:id',isAuthenticated,validation(productSchema.deleteProdu
 //get products
 productRouter.get('/',productController.allProducts);
 
+// update product
+productRouter.put('/:id',isAuthenticated,validation(productSchema.updateProduct),productController.updateProduct)
 export  {productRouter};

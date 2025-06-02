@@ -15,7 +15,9 @@ const productSchema=new Schema({
         type:Number,min:1,required:true
     },
     cloudFolder:{
-        type:String,unique:true,required:true
+        type:String,
+        // unique:true,
+        // required:false
     },
     admin: {
         type: Schema.Types.ObjectId,
