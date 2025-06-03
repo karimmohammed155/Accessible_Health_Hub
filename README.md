@@ -530,3 +530,5 @@ All protected routes require a JWT token. Include the token in the request heade
 ```
 token: noteApp__<your_token>
 ```
+   
+ 
