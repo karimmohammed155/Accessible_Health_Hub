@@ -494,9 +494,12 @@ Creates a new product.
 
 -productImage (file) – image of the product
 
+
+
 name (string, required) – min: 2, max: 200
 
 description (string, optional) – min: 10, max: 500
+
 
 price (integer, required) – min: 1
 
@@ -517,6 +520,7 @@ Body:
 {
   "id": "PRODUCT_OBJECT_ID"
 }
+
 
 ### update Product
 ```
@@ -540,6 +544,7 @@ price (integer, required) – min: 1
 link (string, required) – min: 2
 
 all body variables are optional 
+
 ### Get All Products
 ```
 GET /products/
@@ -553,6 +558,7 @@ All protected routes require a JWT token. Include the token in the request heade
 ```
 token: noteApp__<your_token>
 ```
+
 ######
 
 # Notification Management API
@@ -592,3 +598,4 @@ All protected routes require a JWT token. Include the token in the request heade
 ```
 token: noteApp__<your_token>
 ```
+
