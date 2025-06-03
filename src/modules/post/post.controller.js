@@ -388,12 +388,11 @@ export const searchByAudio = async (req, res) => {
     const results = await post.find({ $text: { $search: transcript } });
 
     // Delete the uploaded audio file after processing
-    fs.unlink(req.file.path, (err) => {
-      if (err) {
-        console.error("Error deleting audio file:", err);
-      } else {
-        console.log("Audio file deleted successfully");
-      }
+    // Delete file from Cloudinary using public_id
+    const publicId = req.file.filename;
+    cloudinary.uploader.destroy(`audio_uploads/${publicId}`, { resource_type: 'video' }, (error, result) => {
+      if (error) console.error("Cloudinary deletion error:", error);
+      else console.log("File deleted from Cloudinary:", result);
     });
 
     res.json({ success: true, transcript, results });
