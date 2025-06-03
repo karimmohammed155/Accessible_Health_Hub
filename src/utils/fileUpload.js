@@ -1,6 +1,11 @@
 // src/middleware/upload.js
 import multer, { diskStorage } from "multer";
 
+import path from "path";
+import fs from 'fs';
+
+
+
 
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import {cloudinary} from './cloudinary.js';
@@ -27,6 +32,8 @@ export const fileUpload=()=>{
     return multer({storage:diskStorage({})});
 }
 
+
 const parser = multer({ storage });
 
 export default parser;
+
