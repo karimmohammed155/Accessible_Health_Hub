@@ -1,6 +1,7 @@
 // src/middleware/upload.js
 import multer, { diskStorage } from "multer";
 import path from "path";
+import fs from 'fs';
 
 const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
