@@ -1,24 +1,26 @@
 import { AssemblyAI } from 'assemblyai';
-import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const client = new AssemblyAI({
   apiKey: '8ab01a9496234811bcd7b26be2a02bf5',
 });
 
-const transcribeAudio = async (fileUrl) => {
+const transcribeAudio = async (filePath) => {
   try {
-    console.log("Downloading from:", fileUrl);
+    const fullPath = path.resolve(filePath);
+    console.log("Uploading from:", fullPath);
 
-    // Stream the file from Cloudinary directly
-    const response = await axios.get(fileUrl, { responseType: 'stream' });
+    const fileStream = fs.createReadStream(fullPath);
 
-    const audioUrl = await client.files.upload(response.data); // direct stream
+    // Upload returns the audio URL directly (string)
+    const audioUrl = await client.files.upload(fileStream);
     console.log("Uploaded to AssemblyAI:", audioUrl);
 
     const transcript = await client.transcripts.transcribe({ audio_url: audioUrl });
 
     if (transcript.status === 'error') {
-      console.error("Transcription error:", transcript.error);
+      console.error(" Transcription error:", transcript.error);
       return null;
     }
 
