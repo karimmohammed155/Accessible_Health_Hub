@@ -494,9 +494,12 @@ Creates a new product.
 
 -productImage (file) – image of the product
 
-name (string, required) – min: 2, max: 20
 
-description (string, optional) – min: 10, max: 200
+
+name (string, required) – min: 2, max: 200
+
+description (string, optional) – min: 10, max: 500
+
 
 price (integer, required) – min: 1
 
@@ -517,6 +520,31 @@ Body:
 {
   "id": "PRODUCT_OBJECT_ID"
 }
+
+
+### update Product
+```
+PUT /admin/
+```
+Creates a new product.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+- **Body:** raw json data
+
+
+
+name (string, required) – min: 2, max: 200
+
+description (string, optional) – min: 10, max: 500
+
+price (integer, required) – min: 1
+
+link (string, required) – min: 2
+
+all body variables are optional 
+
 ### Get All Products
 ```
 GET /products/
@@ -530,6 +558,44 @@ All protected routes require a JWT token. Include the token in the request heade
 ```
 token: noteApp__<your_token>
 ```
-   
-    
- 
+
+######
+
+# Notification Management API
+
+## Overview
+This API provides endpoints for retrieving and updating notifications related to user activities such as likes, comments, and post interactions. All routes require user authentication.
+
+## Base URL
+```
+https://knowledge-sharing-pied.vercel.app/notification
+```
+
+## Endpoints
+
+### Get Notifications
+```
+GET /
+```
+Retrieves all notifications for the authenticated user. Notifications include information about the sender and the associated post.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+
+### Mark Notification as Read
+```
+PATCH /:_id/read
+```
+Marks a specific notification as read by its ID.
+
+- **Headers:**
+  - `token`: Bearer token for authentication
+- **Params:**
+  - `_id` (string) — ID of the notification
+
+## Authentication
+All protected routes require a JWT token. Include the token in the request headers as follows:
+```
+token: noteApp__<your_token>
+```
+
