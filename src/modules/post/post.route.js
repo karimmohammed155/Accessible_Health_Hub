@@ -5,8 +5,9 @@ import {
   isAuthenticated,
   multer_host,
 } from "../../middleware/index.js";
-import { extensions } from "../../utils/index.js";
-import parser from '../../utils/fileUpload.js';
+import { extensions, fileAudioUpload } from "../../utils/index.js";
+import { fileUpload } from "../../utils/index.js";
+const upload = fileAudioUpload();
 
 const post_router = router();
 
@@ -46,6 +47,7 @@ post_router.delete(
 );
 
 post_router.get('/search', post_controller.searchByText); // ?query=some text
+
 post_router.post('/search/audio', parser.single('audio'),post_controller.searchByAudio);
 //just to check
 
