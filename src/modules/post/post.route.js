@@ -6,7 +6,7 @@ import {
   multer_host,
 } from "../../middleware/index.js";
 import { extensions } from "../../utils/index.js";
-import {parser} from '../../utils/fileUpload.js'
+import parser from '../../utils/audioUpload.js'
 
 const post_router = router();
 
