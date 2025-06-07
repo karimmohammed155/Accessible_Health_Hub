@@ -60,8 +60,12 @@ export const add_comment = async (req, res, next) => {
     });
     get_socket().emit("notification", { message: "new comment added" });
   }
+  const populatedComment = await comment.findById(new_comment._id).populate(
+    "author",
+    "name profileImage.url"
+  );
   // response
-  res.status(201).json({ comment: new_comment });
+  res.status(201).json({ comment: populatedComment });
 };
 // GET /api/comment/{post_id}/get
 export const get_comments = async (req, res, next) => {
@@ -74,10 +78,10 @@ export const get_comments = async (req, res, next) => {
   // Get all comment with their replies
   const list_comments = await comment
     .find({ post_id: post_id, parent_comment: null })
-    .populate("author", "name")
+    .populate("author", "name profileImage.url")
     .populate({
       path: "replies",
-      populate: { path: "author", select: "name" }, // Populate replies with author details
+      populate: { path: "author", select: "name profileImage.url" }, // Populate replies with author details
     })
     .sort({ createdAt: -1 });
   // response
