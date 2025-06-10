@@ -129,6 +129,7 @@ export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
   const posts = await post
     .find()
+    .lean()
     .populate("author", "name")
     .populate({
       path: "comments",
@@ -162,7 +163,7 @@ export const get_all_posts = async (req, res, next) => {
         type: "save",
       });
       return {
-        ...post._doc,
+        ...post,
         likes_count,
         ratings_count: ratings.length,
         saves_count,
@@ -390,10 +391,14 @@ export const searchByAudio = async (req, res) => {
     // Delete the uploaded audio file after processing
     // Delete file from Cloudinary using public_id
     const publicId = req.file.filename;
-    cloudinary.uploader.destroy(`audio_uploads/${publicId}`, { resource_type: 'video' }, (error, result) => {
-      if (error) console.error("Cloudinary deletion error:", error);
-      else console.log("File deleted from Cloudinary:", result);
-    });
+    cloudinary.uploader.destroy(
+      `audio_uploads/${publicId}`,
+      { resource_type: "video" },
+      (error, result) => {
+        if (error) console.error("Cloudinary deletion error:", error);
+        else console.log("File deleted from Cloudinary:", result);
+      }
+    );
 
     res.json({ success: true, transcript, results });
   } catch (err) {
