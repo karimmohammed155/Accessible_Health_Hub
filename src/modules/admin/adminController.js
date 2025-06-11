@@ -207,7 +207,7 @@ export const deactivate_user = asyncHandler(async (req, res, next) => {
 
 export const getAllNationalIds = asyncHandler(async (req, res, next) => {
   const doctors = await User.find(
-    { role: "doctor", nationalID: { $ne: null } },
+    { role: "doctor", nationalID: { $ne: null }, isVerified: false },
     { _id: 1, nationalID: 1, name: 1, email: 1 });
 
 
