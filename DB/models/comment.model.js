@@ -30,5 +30,9 @@ const comment_schema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
+comment_schema.index({ parent_comment: 1 });
+comment_schema.index({ post_id: 1 });
+comment_schema.index({ author: 1 }); 
+
 export const comment =
   mongoose.models.comment || model("comment", comment_schema);

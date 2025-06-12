@@ -91,7 +91,7 @@ export const delete_sub_category = async (req, res, next) => {
   // find the sub-category by id and delete it
   const Sub_category = await sub_category.findByIdAndDelete(_id);
   if (!Sub_category) {
-    next(
+    return next(
       new Error_handler_class(
         "sub_category not found",
         400,

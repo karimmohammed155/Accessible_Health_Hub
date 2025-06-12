@@ -28,5 +28,7 @@ const Interaction_schema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
+Interaction_schema.index({ post_id: 1, type: 1 }); 
+
 export const interaction =
   mongoose.models.interaction || model("interaction", Interaction_schema);
