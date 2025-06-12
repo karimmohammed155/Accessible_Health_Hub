@@ -163,7 +163,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
 
 
 export const get_flagged_posts = asyncHandler(async (req, res, next) => {
-  const flaggedPosts=await post.find({isFlagged:true});
+  const flaggedPosts=await post.find({isFlagged:true}).populate('author', 'name');
   return res.json({
     success:true,
     results:{
