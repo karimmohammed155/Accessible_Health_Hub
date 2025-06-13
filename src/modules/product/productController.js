@@ -32,7 +32,8 @@ export const deleteProduct=asyncHandler(async(req,res,next)=>{
 
      // Delete image only if it exists
   if (product.productImage?.id) {
-    await cloudinary.api.delete_resources([product.productImage.id]);
+    const id=product.productImage.id;
+    await cloudinary.api.delete_resources(id);
   }
     //delete folder
     await cloudinary.api.delete_folder(`${process.env.CLOUD_FOLDER_NAME}/products/${product.cloudFolder}`)
