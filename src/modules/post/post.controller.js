@@ -7,7 +7,6 @@ import {
 } from "../../../DB/models/index.js";
 import { cloudinary, Error_handler_class } from "../../utils/index.js";
 import transcribeAudio from "../../utils/transcribe.js";
-import fs from "fs";
 import { Filter } from "bad-words";
 import { Client } from "@gradio/client";
 
