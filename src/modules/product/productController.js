@@ -32,12 +32,15 @@ export const deleteProduct=asyncHandler(async(req,res,next)=>{
 
      // Delete image only if it exists
   if (product.productImage?.id) {
-    const id=product.productImage.id;
-    await cloudinary.api.delete_resources(id);
+    const id = product.productImage.id;
+    await cloudinary.api.delete_resources([id]); // must be an array
   }
-    //delete folder
-    await cloudinary.api.delete_folder(`${process.env.CLOUD_FOLDER_NAME}/products/${product.cloudFolder}`)
-    
+
+  try {
+    await cloudinary.api.delete_folder(`${process.env.CLOUD_FOLDER_NAME}/products/${product.cloudFolder}`);
+  } catch (err) {
+    console.warn("Cloudinary folder deletion skipped or failed:", err.message);
+  }
     //delete product from db
     await product.deleteOne();
 
