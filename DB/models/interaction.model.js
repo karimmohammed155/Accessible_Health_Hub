@@ -15,14 +15,8 @@ const Interaction_schema = new Schema(
     },
     type: {
       type: String,
-      enum: ["like", "rating", "save"],
+      enum: ["like", "save"],
       required: true,
-    },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-      default: null,
     },
   },
   { timestamps: true, versionKey: false }

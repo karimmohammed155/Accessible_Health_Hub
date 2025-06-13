@@ -153,10 +153,6 @@ export const get_all_posts = async (req, res, next) => {
         post_id: post._id,
         type: "like",
       });
-      const ratings = await interaction.find({
-        post_id: post._id,
-        type: "rating",
-      });
       const saves_count = await interaction.countDocuments({
         post_id: post._id,
         type: "save",
@@ -164,7 +160,6 @@ export const get_all_posts = async (req, res, next) => {
       return {
         ...post._doc,
         likes_count,
-        ratings_count: ratings.length,
         saves_count,
       };
     })
@@ -200,10 +195,6 @@ export const get_specific_post = async (req, res, next) => {
     post_id: specific_post._id,
     type: "like",
   });
-  const ratings = await interaction.find({
-    post_id: specific_post._id,
-    type: "rating",
-  });
   const saves_count = await interaction.countDocuments({
     post_id: specific_post._id,
     type: "save",
@@ -212,7 +203,6 @@ export const get_specific_post = async (req, res, next) => {
   res.json({
     post: specific_post,
     likes_count,
-    ratings_count: ratings.length,
     saves_count,
   });
 };

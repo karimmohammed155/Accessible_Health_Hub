@@ -46,7 +46,6 @@ const post_schema = new Schema(
     },
     isFlagged: { type: Boolean, default: false },
     isLiked: { type: Boolean, default: false },
-    isRated: { type: Boolean, default: false },
     isSaved: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
