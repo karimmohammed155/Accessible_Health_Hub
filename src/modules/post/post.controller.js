@@ -128,7 +128,7 @@ export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
   const posts = await post
     .find()
-    .populate("author", "name profileImage.url")
+    .populate("author", "name profileImage.url role")
     .populate({
       path: "comments",
       match: { parent_comment: null },
