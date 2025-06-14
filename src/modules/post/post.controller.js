@@ -172,7 +172,7 @@ export const get_specific_post = async (req, res, next) => {
   // Get post with it's all details
   const specific_post = await post
     .findById(_id)
-    .populate("author", "name profileImage.url")
+    .populate("author", "name profileImage.url role")
     .populate({
       path: "comments",
       match: { parent_comment: null },
