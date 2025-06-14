@@ -32,6 +32,7 @@ user_router.put(
   userController.resetPassword
 );
 
+user_router.put('/changePassword',isAuthenticated,validation(userSchema.changePassword),userController.changePassword)
 user_router.delete("/deleteUser", isAuthenticated, userController.deleteUser);
 
 user_router.put(

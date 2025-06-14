@@ -28,6 +28,15 @@ export const resetPassword=joi.object({
     forgetCode:joi.string().length(5).required(),
 }).required();
 
+export const changePassword=joi.object({
+   
+    password:joi.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/).required(),
+    newPassword:joi.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/).required(),
+    confirmPassword:joi.string().valid(joi.ref("newPassword")).required(),
+
+}).required();
+
+
 export const updateUser=joi.object({
     name:joi.string().min(2).max(25),
 });

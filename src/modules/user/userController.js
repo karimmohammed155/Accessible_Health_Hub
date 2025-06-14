@@ -283,6 +283,28 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
+
+export const changePassword=asyncHandler(async(req,res,next)=>{
+  
+  const user=req.user;
+  const {password,newPassword } = req.body;
+
+  const match = bcrypt.compareSync(password, user.password);
+  if (!match) return next(new Error("Invalid password!"));
+
+  if (!user) return next(new Error("User not found!", { cause: 404 }));
+
+  user.password = await bcrypt.hash(newPassword, parseInt(process.env.SALT_ROUND));
+  await user.save();
+
+
+  return res.json({
+    success: true,
+    message: "password changed successfully"
+  });
+
+});
+
 export const updateUser = asyncHandler(async (req, res, next) => {
   const user = req.user;
   const nameFromBody = req.body.name;
