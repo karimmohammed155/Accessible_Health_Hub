@@ -111,7 +111,7 @@ export const save_post = async (req, res, next) => {
         user_id,
         post_id,
         type: "save",
-        isLiked: false,
+        isSaved: false,
       },
     });
   }
