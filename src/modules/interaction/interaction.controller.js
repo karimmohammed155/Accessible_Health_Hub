@@ -47,6 +47,7 @@ export const like_post = async (req, res, next) => {
     user_id: user_id,
     post_id: post_id,
     type: "like",
+    isLiked: true,
   });
   await new_like.save();
 
@@ -103,6 +104,7 @@ export const save_post = async (req, res, next) => {
     user_id: user_id,
     post_id: post_id,
     type: "save",
+    isSaved: true,
   });
   await new_save.save();
   // add save to post

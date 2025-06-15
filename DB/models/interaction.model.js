@@ -18,11 +18,13 @@ const Interaction_schema = new Schema(
       enum: ["like", "save"],
       required: true,
     },
+    isLiked: { type: Boolean, default: false },
+    isSaved: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
 
-Interaction_schema.index({ post_id: 1, type: 1 }); 
+Interaction_schema.index({ post_id: 1, type: 1 });
 
 export const interaction =
   mongoose.models.interaction || model("interaction", Interaction_schema);

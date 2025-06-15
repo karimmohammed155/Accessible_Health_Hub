@@ -45,13 +45,11 @@ const post_schema = new Schema(
       ref: "sub_category",
     },
     isFlagged: { type: Boolean, default: false },
-    isLiked: { type: Boolean, default: false },
-    isSaved: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
 post_schema.index({ title: "text", content: "text" });
 post_schema.index({ createdAt: -1 });
 post_schema.index({ sub_category: 1 });
-post_schema.index({ author: 1 });     
+post_schema.index({ author: 1 });
 export const post = mongoose.models.post || model("post", post_schema);
