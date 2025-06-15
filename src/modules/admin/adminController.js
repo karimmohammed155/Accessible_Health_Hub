@@ -324,8 +324,8 @@ export const rejectDoctor = asyncHandler(async (req, res, next) => {
   const emailMessage = await sendEmail({
     to: user.email,
     subject: "Doctor Account rejected",
-    html: `<p style="font-family: Arial, sans-serif; font-size: 18px; color: #333; text-align: center; background-color: #eaf7e3; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 20px auto;">
-    <strong style="color: #4CAF50;">Your account has been rejected</strong><br>
+    html: `<p style="font-family: Arial, sans-serif; font-size: 18px; color: #333; text-align: center; background-color:rgb(202, 124, 124); padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 20px auto;">
+    <strong style="color: rgb(0, 0, 0);">Your account has been rejected</strong><br>
     please enter a valid national id then try again
   </p>`,
   });
