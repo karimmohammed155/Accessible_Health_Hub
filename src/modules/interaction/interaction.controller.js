@@ -40,7 +40,15 @@ export const like_post = async (req, res, next) => {
       type: "like",
     });
     get_socket().emit("notification", { message: "like removed" });
-    return res.json({ message: "Like Removed" });
+    return res.json({
+      message: "Like Removed",
+      Data: {
+        user_id,
+        post_id,
+        type: "like",
+        isLiked: false,
+      },
+    });
   }
   // add new like
   const new_like = new interaction({
@@ -97,7 +105,15 @@ export const save_post = async (req, res, next) => {
     await post.findByIdAndUpdate(post_id, {
       $pull: { interactions: save_exists._id },
     });
-    return res.json({ message: "Post unsaved" });
+    return res.json({
+      message: "Post unsaved",
+      Data: {
+        user_id,
+        post_id,
+        type: "save",
+        isLiked: false,
+      },
+    });
   }
   // add new save
   const new_save = new interaction({
