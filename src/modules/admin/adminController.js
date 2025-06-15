@@ -281,3 +281,77 @@ export const verifyDoctor = asyncHandler(async (req, res, next) => {
     message: `Doctor ${user.name} has been successfully verified.`,
   });
 });
+
+export const rejectDoctor = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+
+
+
+  // Find the user (doctor) by userId
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found.",
+    });
+  }
+
+  // Ensure the user is a doctor and has a national ID uploaded
+  if (user.role !== "doctor") {
+    return res.status(400).json({
+      success: false,
+      message: "Only doctor accounts can be verified.",
+    });
+  }
+
+  if (!user.nationalID) {
+    return res.status(400).json({
+      success: false,
+      message: "Doctor has not uploaded a national ID for verification.",
+    });
+  }
+
+  // Ensure the doctor is not already verified
+  if (user.isVerified) {
+    return res.status(400).json({
+      success: false,
+      message: "Doctor is already verified.",
+    });
+  }
+
+
+  // Optionally, send a notification email to the doctor (you can use sendEmail here)
+  const emailMessage = await sendEmail({
+    to: user.email,
+    subject: "Doctor Account rejected",
+    html: `<p style="font-family: Arial, sans-serif; font-size: 18px; color: #333; text-align: center; background-color: #eaf7e3; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 20px auto;">
+    <strong style="color: #4CAF50;">Your account has been rejected</strong><br>
+    please enter a valid national id then try again
+  </p>`,
+  });
+
+  if (!emailMessage) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send verification notification email.",
+    });
+  }
+
+    // Delete user tokens
+  await Token.deleteMany({ user: user._id });
+  
+  // Delete user natinal id image from Cloudinary if not default
+  if (user.nationalID ) {
+      await cloudinary.uploader.destroy(user.nationalID.id);
+  }
+  
+    // Delete the user
+  await User.findOneAndDelete({ email: user.email });
+  
+
+  // Return success response
+  return res.status(200).json({
+    success: true,
+    message: `Doctor  has been rejected and deleted from DB.`,
+  });
+});

@@ -126,8 +126,11 @@ export const add_post = async (req, res, next) => {
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
+  const limit = parseInt(req.query.limit) || 10;
+  const cursor = req.query.cursor;
+  const que = cursor ? { createdAt: { $lt: new Date(cursor) } } : {};
   const posts = await post
-    .find()
+    .find(que)
     .populate("author", "name profileImage.url role")
     .populate({
       path: "comments",
@@ -139,7 +142,12 @@ export const get_all_posts = async (req, res, next) => {
     })
     .populate("interactions")
     .populate("sub_category")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 }).limit(limit);
+
+  if (!posts || posts.length === 0) {
+    return res.json({ posts: [], nextCursor: null, hasMore: false });
+  }
+
   if (!posts) {
     return next(
       new Error_handler_class("posts not found", 404, "posts not found")
@@ -163,8 +171,12 @@ export const get_all_posts = async (req, res, next) => {
       };
     })
   );
+  const nextCursor = posts[posts.length - 1].createdAt;
   // response
-  res.json({ posts: postsWithStats });
+  res.json({
+    posts: postsWithStats, nextCursor,
+    hasMore: posts.length === limit,
+  });
 };
 // Get specific posts api
 export const get_specific_post = async (req, res, next) => {

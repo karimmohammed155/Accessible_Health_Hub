@@ -42,4 +42,8 @@ adminRouter.post('/',isAuthenticated,fileUpload().fields([
 adminRouter.delete('/:id',isAuthenticated,validation(productSchema.deleteProduct),productController.deleteProduct);
 
 adminRouter.put('/:id',isAuthenticated,validation(productSchema.updateProduct),productController.updateProduct);
+
+adminRouter.delete('/rejectDoctor/:userId',isAuthenticated,adminController.rejectDoctor);
+
 export  {adminRouter};
+
