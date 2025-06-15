@@ -44,4 +44,6 @@ user_router.put(
 );
 
 user_router.get('/userProfile',isAuthenticated,userController.userProfile);
+user_router.get('/othersProfile/:id',isAuthenticated,userController.othersProfile);
+
 export { user_router };
