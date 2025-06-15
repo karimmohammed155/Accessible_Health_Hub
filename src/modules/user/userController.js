@@ -371,3 +371,18 @@ export const userProfile=asyncHandler(async(req,res,next)=>{
     userPosts:{posts}
   })
 });
+
+export const othersProfile=asyncHandler(async(req,res,next)=>{
+  const {id}=req.params;
+
+  const user=await User.findById(id);
+
+  const posts=await post.find({author:user});
+
+    return res.status(200).json({
+    success:true,
+    userInformation:{user},
+    userPosts:{posts}
+  })
+
+});
