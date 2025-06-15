@@ -198,6 +198,26 @@ export const deactivate_user = asyncHandler(async (req, res, next) => {
   user.deactivatedUntil = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000); // 15 days
   await user.save();
 
+const emailMessage = await sendEmail({
+    to: user.email,
+    subject: "Account deactivation alert",
+    html: `
+    <div style="font-family: Arial, sans-serif; font-size: 18px; color: #333; text-align: center; background-color: rgb(202, 124, 124); padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 20px auto;">
+      <strong style="color: rgb(0, 0, 0);">
+        Your account has been deactivated due to publishing content that violates our policy (e.g., inappropriate language). It will remain inactive until <u>${user.deactivatedUntil}</u>.
+      </strong>
+      <br><br>
+    </div>
+  `,
+  });
+
+    if (!emailMessage) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send rejection notification email.",
+    });
+  }
+  
   res.json({
     success: true,
     message: `User who posted the flagged content has been deactivated for 15 days.`,
