@@ -13,6 +13,10 @@ comment_router.get(
   "/:post_id/get",
   error_handle(comment_controller.get_comments)
 );
+comment_router.get(
+  "/:post_id/get_count",
+  error_handle(comment_controller.get_comments_count)
+);
 comment_router.delete(
   "/:_id/delete",
   isAuthenticated,

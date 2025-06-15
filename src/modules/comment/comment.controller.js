@@ -60,10 +60,9 @@ export const add_comment = async (req, res, next) => {
     });
     get_socket().emit("notification", { message: "new comment added" });
   }
-  const populatedComment = await comment.findById(new_comment._id).populate(
-    "author",
-    "name profileImage.url"
-  );
+  const populatedComment = await comment
+    .findById(new_comment._id)
+    .populate("author", "name profileImage.url");
   // response
   res.status(201).json({ comment: populatedComment });
 };
@@ -86,6 +85,18 @@ export const get_comments = async (req, res, next) => {
     .sort({ createdAt: -1 });
   // response
   res.status(200).json(list_comments);
+};
+export const get_comments_count = async (req, res, next) => {
+  const { post_id } = req.params;
+  // check if post exists
+  const post_exists = await post.findOne({ _id: post_id });
+  if (!post_exists) {
+    return res.status(404).json({ error: "Post not found" });
+  }
+  // get comments count for specific post
+  const comments_count = await comment.countDocuments({ post_id: post_id });
+  // response
+  res.status(200).json({ post: post_id, comments_count: comments_count });
 };
 // DELETE /api/comment/{_id}/delete
 export const delete_comment = async (req, res, next) => {
