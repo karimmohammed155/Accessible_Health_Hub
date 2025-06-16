@@ -6,7 +6,7 @@ export class api_features {
 
   //sort
   sort() {
-    this.mongoose_query.sort(this.query.sort);
+    this.mongoose_query.sort({ createdAt: -1 });
     return this;
   }
 
@@ -15,7 +15,7 @@ export class api_features {
     const { page = 1, limit = 2 } = this.query;
     const skip = (page - 1) * limit;
 
-    this.mongoose_query.skip(skip).limit(limit)
+    this.mongoose_query.skip(skip).limit(limit);
     return this;
   }
 

@@ -5,7 +5,11 @@ import {
   post,
   sub_category,
 } from "../../../DB/models/index.js";
-import { cloudinary, Error_handler_class } from "../../utils/index.js";
+import {
+  api_features,
+  cloudinary,
+  Error_handler_class,
+} from "../../utils/index.js";
 import transcribeAudio from "../../utils/transcribe.js";
 import { Filter } from "bad-words";
 import { Client } from "@gradio/client";
@@ -126,22 +130,25 @@ export const add_post = async (req, res, next) => {
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
-  const posts = await post
+  const all_posts = post
     .find()
     .populate("author", "name profileImage.url role")
     .populate("comments")
     .populate("interactions")
     .populate("sub_category")
-    .sort({ createdAt: -1 })
     .lean();
-  if (!posts) {
+  const new_api_feature = new api_features(all_posts, req.query)
+    .pagination()
+    .sort();
+  const find_post = await new_api_feature.mongoose_query;
+  if (!find_post) {
     return next(
       new Error_handler_class("posts not found", 404, "posts not found")
     );
   }
   // response
   res.json({
-    posts: posts,
+    posts: find_post,
   });
 };
 // Get specific posts api
