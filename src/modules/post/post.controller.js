@@ -133,32 +133,15 @@ export const get_all_posts = async (req, res, next) => {
     .populate("interactions")
     .populate("sub_category")
     .sort({ createdAt: -1 })
+    .lean();
   if (!posts) {
     return next(
       new Error_handler_class("posts not found", 404, "posts not found")
     );
   }
-  // Get posts with their stats
-  const postsWithStats = await Promise.all(
-    posts.map(async (post) => {
-      const likes_count = await interaction.countDocuments({
-        post_id: post._id,
-        type: "like",
-      });
-      const saves_count = await interaction.countDocuments({
-        post_id: post._id,
-        type: "save",
-      });
-      return {
-        ...post._doc,
-        likes_count,
-        saves_count,
-      };
-    })
-  );
   // response
   res.json({
-    posts: postsWithStats,
+    posts: posts,
   });
 };
 // Get specific posts api
