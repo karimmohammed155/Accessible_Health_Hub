@@ -126,28 +126,13 @@ export const add_post = async (req, res, next) => {
 // Get all posts api
 export const get_all_posts = async (req, res, next) => {
   // Get posts with their all details
-  const limit = parseInt(req.query.limit) || 10;
-  const cursor = req.query.cursor;
-  const que = cursor ? { createdAt: { $lt: new Date(cursor) } } : {};
   const posts = await post
-    .find(que)
+    .find()
     .populate("author", "name profileImage.url role")
-    .populate({
-      path: "comments",
-      match: { parent_comment: null },
-      populate: {
-        path: "replies",
-        populate: { path: "author", select: "name profileImage.url" },
-      },
-    })
+    .populate("comments")
     .populate("interactions")
     .populate("sub_category")
-    .sort({ createdAt: -1 }).limit(limit);
-
-  if (!posts || posts.length === 0) {
-    return res.json({ posts: [], nextCursor: null, hasMore: false });
-  }
-
+    .sort({ createdAt: -1 })
   if (!posts) {
     return next(
       new Error_handler_class("posts not found", 404, "posts not found")
@@ -171,11 +156,9 @@ export const get_all_posts = async (req, res, next) => {
       };
     })
   );
-  const nextCursor = posts[posts.length - 1].createdAt;
   // response
   res.json({
-    posts: postsWithStats, nextCursor,
-    hasMore: posts.length === limit,
+    posts: postsWithStats,
   });
 };
 // Get specific posts api
@@ -391,10 +374,14 @@ export const searchByAudio = async (req, res) => {
     // Delete the uploaded audio file after processing
     // Delete file from Cloudinary using public_id
     const publicId = req.file.filename;
-    cloudinary.uploader.destroy(`audio_uploads/${publicId}`, { resource_type: 'video' }, (error, result) => {
-      if (error) console.error("Cloudinary deletion error:", error);
-      else console.log("File deleted from Cloudinary:", result);
-    });
+    cloudinary.uploader.destroy(
+      `audio_uploads/${publicId}`,
+      { resource_type: "video" },
+      (error, result) => {
+        if (error) console.error("Cloudinary deletion error:", error);
+        else console.log("File deleted from Cloudinary:", result);
+      }
+    );
 
     res.json({ success: true, transcript, results });
   } catch (err) {
