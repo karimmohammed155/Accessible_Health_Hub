@@ -151,14 +151,7 @@ export const get_specific_post = async (req, res, next) => {
   const specific_post = await post
     .findById(_id)
     .populate("author", "name profileImage.url role")
-    .populate({
-      path: "comments",
-      match: { parent_comment: null },
-      populate: {
-        path: "replies",
-        populate: { path: "author", select: "name profileImage.url" },
-      },
-    })
+    .populate("comments")
     .populate("interactions")
     .populate("sub_category");
   // Check if the posts exists
@@ -167,20 +160,9 @@ export const get_specific_post = async (req, res, next) => {
       new Error_handler_class("posts not found", 404, "posts not found")
     );
   }
-  // Get post with it's stats
-  const likes_count = await interaction.countDocuments({
-    post_id: specific_post._id,
-    type: "like",
-  });
-  const saves_count = await interaction.countDocuments({
-    post_id: specific_post._id,
-    type: "save",
-  });
   // response
   res.json({
     post: specific_post,
-    likes_count,
-    saves_count,
   });
 };
 // Update post api
