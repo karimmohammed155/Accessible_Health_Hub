@@ -133,7 +133,13 @@ export const get_all_posts = async (req, res, next) => {
   const all_posts = post
     .find()
     .populate("author", "name profileImage.url role")
-    .populate("comments")
+    .populate({
+      path: "comments",
+      populate: {
+        path: "author",
+        select: "name profileImage.url",
+      },
+    })
     .populate("interactions")
     .populate("sub_category")
     .lean();
